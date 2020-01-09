@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">TFM</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="home">Inicio</string>
+
+    <!-- Register user -->
+    <string name="register_token_out1">Introduce el token que le proporcione la terapeuta para sincronizar el dispositivo</string>
+    <string name="register_token_out2">XXXXXX</string>
+</resources>
