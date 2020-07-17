@@ -1,0 +1,95 @@
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/calibrateSleepLayout">
+
+    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:elevation="4dp"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:theme="@style/ToolbarTheme"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:title="Calibrar durante el sueño"
+            app:titleTextColor="@color/md_white_1000"/>
+
+        <TextView
+            android:id="@+id/textinfo"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:gravity="center_horizontal"
+            android:inputType="textMultiLine"
+            android:singleLine="false"
+            android:text="@string/calibrate_sleep_info"
+            android:textSize="35dp"
+            android:textColor="@color/black"
+            android:textAlignment="center"
+            app:layout_constraintBottom_toTopOf="@+id/btnCalibrateSleep1"
+            app:layout_constraintEnd_toEndOf="@+id/btnCalibrateSleep1"
+            app:layout_constraintStart_toStartOf="@+id/btnCalibrateSleep1"
+            android:layout_marginBottom="30dp"/>
+
+        <Button
+            android:id="@+id/btnCalibrateSleep1"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:text="@string/calibrate_sleep_btn1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <Button
+            android:id="@+id/btnCalibrateSleep2"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:text="@string/calibrate_sleep_btn2"
+            android:inputType="textMultiLine"
+            android:layout_marginTop="30dp"
+            android:enabled="false"
+            app:layout_constraintEnd_toEndOf="@+id/btnCalibrateSleep1"
+            app:layout_constraintStart_toStartOf="@+id/btnCalibrateSleep1"
+            app:layout_constraintTop_toBottomOf="@+id/btnCalibrateSleep1"/>
+
+
+        <TextView
+            android:id="@+id/calibrate_sleep_text_info"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:gravity="center_horizontal"
+            android:text=""
+            android:textStyle="bold"
+            android:textSize="30dp"
+            android:textAlignment="center"
+            app:layout_constraintEnd_toEndOf="@+id/btnCalibrateSleep2"
+            app:layout_constraintStart_toStartOf="@+id/btnCalibrateSleep2"
+            app:layout_constraintTop_toBottomOf="@+id/btnCalibrateSleep2"
+            android:layout_marginTop="30dp"/>
+
+        <TextView
+            android:id="@+id/calibrate_sleep_text_info2"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:gravity="center_horizontal"
+            android:text="@string/calibrate_sleep_info2"
+            android:textSize="16dp"
+            android:textAlignment="center"
+            app:layout_constraintEnd_toEndOf="@+id/calibrate_sleep_text_info"
+            app:layout_constraintStart_toStartOf="@+id/calibrate_sleep_text_info"
+            app:layout_constraintTop_toBottomOf="@+id/calibrate_sleep_text_info"
+            android:layout_marginTop="30dp"/>
+    </android.support.constraint.ConstraintLayout>
+</android.support.design.widget.CoordinatorLayout>

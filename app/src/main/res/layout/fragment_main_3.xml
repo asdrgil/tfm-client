@@ -1,0 +1,103 @@
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/main_not_calibrated">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+
+        <TextView
+            android:id="@+id/textPatternInfoOld"
+            android:layout_width="230dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:gravity="center_horizontal"
+            android:inputType="textMultiLine"
+            android:singleLine="false"
+            android:text="Pauta anterior recomendada"
+            android:textAlignment="center"
+            android:textSize="18dp"
+            android:textColor="@color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/textPatternValueOld"
+            android:layout_marginTop="30dp"/>
+
+        <TextView
+            android:id="@+id/textPatternValueOld"
+            android:layout_width="300dp"
+            android:layout_height="100dp"
+            android:ems="10"
+            android:gravity="center"
+            android:inputType="textMultiLine"
+            android:singleLine="false"
+            android:text="[DEBUG] Texto de la pauta"
+            android:textAlignment="center"
+            android:textSize="20dp"
+            android:textStyle="bold|italic"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:background="@layout/border"
+            android:layout_marginTop="15dp"/>
+
+
+        <TextView
+            android:id="@+id/textUsefulnessPattern"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="¿Te ha resultado útil esta pauta?"
+            android:textStyle="bold"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            app:layout_constraintTop_toBottomOf="@+id/textPatternValueOld"
+            app:layout_constraintEnd_toEndOf="@+id/textPatternValueOld"
+            app:layout_constraintStart_toStartOf="@+id/textPatternValueOld"
+            android:layout_marginTop="30dp"/>
+
+        <RadioGroup
+            android:id="@+id/checkboxUsefulnessPattern"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:gravity="center"
+            app:layout_constraintTop_toBottomOf="@+id/textUsefulnessPattern"
+            app:layout_constraintEnd_toEndOf="@+id/textUsefulnessPattern"
+            app:layout_constraintStart_toStartOf="@+id/textUsefulnessPattern">
+
+            <RadioButton
+                android:id="@+id/usefulnessPatternYes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="false"
+                android:textStyle="bold"
+                android:text="Sí"/>
+
+            <RadioButton
+                android:id="@+id/usefulnessPatternNo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="false"
+                android:textStyle="bold"
+                android:text="No"/>
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/btnUsefulnessPattern"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="Aceptar"
+            app:layout_constraintTop_toBottomOf="@+id/checkboxUsefulnessPattern"
+            app:layout_constraintEnd_toEndOf="@+id/checkboxUsefulnessPattern"
+            app:layout_constraintStart_toStartOf="@+id/checkboxUsefulnessPattern"
+            android:layout_marginTop="30dp"/>
+
+
+    </android.support.constraint.ConstraintLayout>
+
+</android.support.design.widget.CoordinatorLayout>

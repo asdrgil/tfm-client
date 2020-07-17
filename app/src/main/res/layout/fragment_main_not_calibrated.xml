@@ -1,0 +1,86 @@
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/main_not_calibrated">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:elevation="4dp"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:theme="@style/ToolbarTheme"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:title="Primeros pasos"
+            app:titleTextColor="@color/md_white_1000"/>
+
+        <TextView
+            android:id="@+id/main_not_registered_info"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:gravity="center_horizontal"
+            android:inputType="textMultiLine"
+            android:singleLine="false"
+            android:text="@string/main_not_registered_info"
+            android:textStyle="bold"
+            android:textSize="30dp"
+            android:textColor="@android:color/black"
+            android:textAlignment="center"
+            app:layout_constraintBottom_toTopOf="@+id/btnRegister"
+            app:layout_constraintEnd_toEndOf="@+id/btnRegister"
+            app:layout_constraintStart_toStartOf="@+id/btnRegister"
+            android:layout_marginBottom="30dp"/>
+
+        <Button
+            android:id="@+id/btnRegister"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:text="@string/main_not_registered_info2"
+            android:inputType="textMultiLine"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.6"/>
+
+        <Button
+            android:id="@+id/btnCalibrate"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:text="@string/main_not_registered_info3"
+            android:inputType="textMultiLine"
+            app:layout_constraintEnd_toEndOf="@+id/btnRegister"
+            app:layout_constraintStart_toStartOf="@+id/btnRegister"
+            app:layout_constraintTop_toBottomOf="@+id/btnRegister"
+            android:layout_marginTop="30dp"/>
+
+        <TextView
+            android:id="@+id/calibrate_main"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:gravity="center_horizontal"
+            android:text="0/2"
+            android:textStyle="bold"
+            android:textSize="30dp"
+            android:textAlignment="center"
+            android:textColor="@color/red"
+            app:layout_constraintEnd_toEndOf="@+id/btnCalibrate"
+            app:layout_constraintStart_toStartOf="@+id/btnCalibrate"
+            app:layout_constraintTop_toBottomOf="@+id/btnCalibrate"
+            android:layout_marginTop="30dp"/>
+
+    </android.support.constraint.ConstraintLayout>
+
+
+
+</android.support.design.widget.CoordinatorLayout>

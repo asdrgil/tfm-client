@@ -1,0 +1,79 @@
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/registerLayout">
+
+    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:elevation="4dp"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:theme="@style/ToolbarTheme"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:title="Calibrar dispositivoº"
+            app:titleTextColor="@color/md_white_1000"/>
+
+        <TextView
+            android:id="@+id/textinfo"
+            android:layout_width="230dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:gravity="center_horizontal"
+            android:inputType="textMultiLine"
+            android:singleLine="false"
+            android:text="@string/calibrate_info"
+            android:textSize="20dp"
+            android:textAlignment="center"
+            app:layout_constraintBottom_toTopOf="@+id/btnCalibrateSleep"
+            app:layout_constraintEnd_toEndOf="@+id/btnCalibrateSleep"
+            app:layout_constraintStart_toStartOf="@+id/btnCalibrateSleep"
+            android:layout_marginBottom="30dp"/>
+
+        <Button
+            android:id="@+id/btnCalibrateSleep"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:text="Calibrar durante el sueño"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <Button
+            android:id="@+id/btnCalibrateExercise"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:text="Calibrar durante el ejercicio físico"
+            android:inputType="textMultiLine"
+            android:layout_marginTop="30dp"
+            app:layout_constraintEnd_toEndOf="@+id/btnCalibrateSleep"
+            app:layout_constraintStart_toStartOf="@+id/btnCalibrateSleep"
+            app:layout_constraintTop_toBottomOf="@+id/btnCalibrateSleep"/>
+
+        <TextView
+            android:id="@+id/calibrate_counter"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:gravity="center_horizontal"
+            android:text="0/2"
+            android:textStyle="bold"
+            android:textSize="30dp"
+            android:textAlignment="center"
+            android:textColor="@color/red"
+            app:layout_constraintEnd_toEndOf="@+id/btnCalibrateExercise"
+            app:layout_constraintStart_toStartOf="@+id/btnCalibrateExercise"
+            app:layout_constraintTop_toBottomOf="@+id/btnCalibrateExercise"
+            android:layout_marginTop="30dp"/>
+    </android.support.constraint.ConstraintLayout>
+</android.support.design.widget.CoordinatorLayout>

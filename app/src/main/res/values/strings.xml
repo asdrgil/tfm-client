@@ -1,0 +1,62 @@
+<resources>
+    <string name="app_name">Termómetro de la ira</string>
+    <string name="action_settings">Ajustes</string>
+    <string name="title_activity_settings">Ajustes</string>
+
+    <string name="register_token_length">El token debe tener seis caracteres.</string>
+    <string name="register_token_invalid">El token introducido no es válido.</string>
+    <string name="register_token_internet_error">En este momento no se puede acceder a
+        la página del servidor. Por favor, revisa tu conexión a Internet.</string>
+
+    <string name="snackbar_cancel">Acción cancelada</string>
+
+    <!-- Fragment strings-->
+
+    <!-- Register fragment-->
+    <string name="register_info">Introduzca el token proporcionado por el terapeuta</string>
+
+    <!-- Register done fragment-->
+    <string name="register_done">El usuario se registró correctamente el día [fecha] a las
+        [hora].</string>
+
+    <!-- Calibrate fragment-->
+    <string name="calibrate_info">Para poder calibrar el dispositivo, es necesario obtener tu
+        ritmo cardíaco cuando vayas a dormir y cuando realices ejercicio físico.</string>
+
+    <!-- Calibrate sleep fragment-->
+    <string name="calibrate_sleep_info">Indica cuándo te vas a dormir y cuándo te acuestas</string>
+    <string name="calibrate_sleep_info2">Nota: el tiempo entre que se acuesta y se despierta debe
+        ser de al menos dos horas.</string>
+    <string name="calibrate_sleep_info3">Te acostaste a las [horas]</string>
+
+    <string name="calibrate_sleep_btn1">Me voy a acostar</string>
+    <string name="calibrate_sleep_btn2">Me acabo de despertar</string>
+
+    <string name="calibrate_sleep_snackbar1">Se ha eliminado la hora a la que te acostaste</string>
+    <string name="calibrate_wakeup_snackbar1">Es necesario que el periodo de sueño sea de al menos
+        dos horas</string>
+
+    <string name="calibrate_wakeup_snackbar2">Es necesario especificar primero la hora a la que te
+        acostaste</string>
+    <string name="calibrate_wakeup_snackbar3">Se ha finalizado correctamente la calibración de la
+        actividad física</string>
+
+    <string name="calibrate_sleep_alert">¿Quieres eliminar la hora a la que te acostaste?</string>
+    <string name="calibrate_wakeup_alert">Confirma si quieres guardar la hora actual como la hora a la que te levantaste</string>
+
+
+    <!-- Calibrate exercise fragment -->
+    <string name="calibrate_exercise_info">Indica cuándo empiezas a realizar ejercicio físico</string>
+    <string name="calibrate_exercise_info2">Nota: es necesario que la sesión de ejercicio físico
+        sea de al menos 15 minutos.</string>
+    <string name="calibrate_exercise_info3">Calibrado del ejercicio realizado correctamente</string>
+
+    <!-- Main not register fragment-->
+    <string name="main_not_registered_info">Para empezar a utilizar la aplicación,
+        es necesario:</string>
+    <string name="main_not_registered_info2">Registrar el dispositivo</string>
+    <string name="main_not_registered_info3">Calibrar el dispositivo</string>
+
+    <!-- Main fragment-->
+    <string name="main_info">Main calibrated</string>
+</resources>

@@ -1,0 +1,104 @@
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/calibrateSleepLayout">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:elevation="4dp"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:theme="@style/ToolbarTheme"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:title="Calibrar durante el ejercicio físico"
+            app:titleTextColor="@color/md_white_1000"/>
+
+        <TextView
+            android:id="@+id/exerciseTextInfo"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:gravity="center_horizontal"
+            android:inputType="textMultiLine"
+            android:singleLine="false"
+            android:text="@string/calibrate_exercise_info"
+            android:textSize="35dp"
+            android:textColor="@color/black"
+            android:textAlignment="center"
+            app:layout_constraintBottom_toTopOf="@+id/btnStartExercise"
+            app:layout_constraintEnd_toEndOf="@+id/btnStartExercise"
+            app:layout_constraintStart_toStartOf="@+id/btnStartExercise"
+            android:layout_marginBottom="25dp"/>
+
+        <Button
+            android:id="@+id/btnStartExercise"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:text="Iniciar ejercicio"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <Chronometer
+            android:id="@+id/exercise_chronometer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="25dp"
+            android:textSize="30dp"
+
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btnStartExercise"
+            android:layout_marginLeft="100dp"/>
+
+        <TextView
+            android:id="@+id/maxTimeTxt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="30dp"
+            android:gravity="left"
+            android:singleLine="true"
+            android:text="/15:00"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toEndOf="@+id/exercise_chronometer"
+            app:layout_constraintBaseline_toBaselineOf="@+id/exercise_chronometer"/>
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="false"
+            android:max="100"
+            android:minHeight="50dp"
+            android:minWidth="150dp"
+            android:progress="0"
+            app:layout_constraintEnd_toEndOf="@+id/maxTimeTxt"
+            app:layout_constraintStart_toStartOf="@+id/exercise_chronometer"
+            app:layout_constraintTop_toBottomOf="@+id/exercise_chronometer"
+            android:layout_marginTop="5dp"/>
+
+        <TextView
+            android:id="@+id/calibrate_sleep_text_info2"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:gravity="center_horizontal"
+            android:text="@string/calibrate_sleep_info2"
+            android:textSize="16dp"
+            android:textAlignment="center"
+            app:layout_constraintEnd_toEndOf="@+id/btnStartExercise"
+            app:layout_constraintStart_toStartOf="@+id/btnStartExercise"
+            app:layout_constraintTop_toBottomOf="@+id/progressBar"
+            android:layout_marginTop="15dp"/>
+    </android.support.constraint.ConstraintLayout>
+</android.support.design.widget.CoordinatorLayout>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/item_navigation_drawer_index"
+            android:icon="@drawable/ic_home_black_24dp"
+            android:title="Inicio" />
+        <item
+            android:id="@+id/item_navigation_drawer_summary"
+            android:icon="@drawable/ic_library_books_black_24dp"
+            android:title="Resumen de episodios" />
+    </group>
+
+    <item android:title="Primeros pasos">
+        <menu>
+
+            <item
+                android:id="@+id/item_navigation_drawer_register"
+                android:icon="@drawable/ic_assignment_ind_black_24dp"
+                android:title="Registrar dispositivo" />
+
+            <item
+                android:id="@+id/item_navigation_drawer_calibrate"
+                android:icon="@drawable/ic_donut_large_black_24dp"
+                android:title="Calibrar dispositivo" />
+        </menu>
+    </item>
+
+</menu>
