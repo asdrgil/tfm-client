@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.media.Image;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -50,6 +51,7 @@ import com.rarawa.tfm.fragments.MainNotCalibratedFragment;
 import com.rarawa.tfm.fragments.RegisterFragment;
 import com.rarawa.tfm.services.GenerateEpisodesService;
 import com.rarawa.tfm.sqlite.SqliteHandler;
+import com.rarawa.tfm.sqlite.models.Patterns;
 import com.rarawa.tfm.sqlite.models.UserInfo;
 import com.rarawa.tfm.utils.Constants;
 
@@ -123,10 +125,44 @@ public class MainActivity extends AppCompatActivity {
                     //TODO:get and store the new recommended pattern
 
                     updateMainSubFragment(context, currentAngerLevel);
-                    updateThermometer(findViewById(R.id.thermoIcon), findViewById(R.id.textLevel), currentAngerLevel);
+                    updateThermometer(findViewById(R.id.thermoIcon),
+                            findViewById(R.id.textLevel), currentAngerLevel);
+
+                    updatePattern(context, currentAngerLevel);
                 }
             };
         }
+    }
+
+    private void updatePattern(Context context, int currentAngerLevel){
+        SharedPreferences sharedPref = context.getSharedPreferences(
+                Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
+
+        String currentPatternUnparsed =
+                sharedPref.getString(Constants.SHAREDPREFERENCES_CURRENT_PATTERN, "");
+
+        String newPattenUnparsed = "";
+
+        if(currentAngerLevel > 0){
+            Patterns newPattern = db.getRandomPatternByAngerLevel(currentAngerLevel);
+            newPattenUnparsed = String.format("%d,%s",newPattern.getId(), newPattern.getName());
+        } else {
+            newPattenUnparsed = "";
+            sharedPrefEditor.putString(Constants.SHAREDPREFERENCES_NEXT_PATTERN, newPattenUnparsed);
+        }
+
+        //There is no active pattern and the angerLevel is over zero
+        if(currentPatternUnparsed.length() == 0 && currentAngerLevel > 0){
+            sharedPrefEditor.putString(Constants.SHAREDPREFERENCES_CURRENT_PATTERN, newPattenUnparsed);
+
+        //There is an active pattern and the angerLevel is over zero
+        //It does not matter if there was a queued pattern or not, it's overwritten
+        } else if(currentPatternUnparsed.length() > 0 && currentAngerLevel > 0){
+            sharedPrefEditor.putString(Constants.SHAREDPREFERENCES_NEXT_PATTERN, newPattenUnparsed);
+        }
+
+        sharedPrefEditor.apply();
     }
 
     private void updateMainSubFragment(Context context, int currentAngerLevel){
@@ -553,8 +589,8 @@ public class MainActivity extends AppCompatActivity {
             fragmentTransaction.replace(R.id.subfragment_main, mainFragment_3);
             sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_FRAGMENT_MAIN, 3);
         } else {
-            MainFragment_3 mainFragment_3 = new MainFragment_3();
-            fragmentTransaction.replace(R.id.fragment_empty, mainFragment_3);
+            MainFragment_0 mainFragment_0 = new MainFragment_0();
+            fragmentTransaction.replace(R.id.subfragment_main, mainFragment_0);
             sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_FRAGMENT_MAIN, 0);
         }
 

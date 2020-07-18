@@ -103,4 +103,8 @@ public class Constants {
     //Sharedpreferences info
     public static final String SHAREDPREFERENCES_FILE = "spFile";
     public static final String SHAREDPREFERENCES_FRAGMENT_MAIN = "fragmentMain";
+    public static final String SHAREDPREFERENCES_CURRENT_PATTERN = "currentPattern";
+    public static final String SHAREDPREFERENCES_NEXT_PATTERN = "nextPattern";
+    //ID of the anger level measurement that is being displayed on the screen
+    public static final String SHAREDPREFERENCES_DISPLAY_ANGERLEVEL_ID = "displayAngerLevelId";
 }

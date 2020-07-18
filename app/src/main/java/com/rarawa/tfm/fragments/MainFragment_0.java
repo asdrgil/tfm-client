@@ -46,6 +46,4 @@ public class MainFragment_0 extends Fragment {
         return rootView;
     }
 
-    //TODO: method updateThermometer
-
 }

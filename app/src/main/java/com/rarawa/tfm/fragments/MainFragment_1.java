@@ -20,6 +20,8 @@ import android.widget.TextView;
 
 import com.rarawa.tfm.MainActivity;
 import com.rarawa.tfm.R;
+import com.rarawa.tfm.sqlite.SqliteHandler;
+import com.rarawa.tfm.sqlite.models.AngerLevel;
 import com.rarawa.tfm.utils.Constants;
 
 import java.util.Map;
@@ -28,6 +30,8 @@ import static com.rarawa.tfm.utils.Constants.REASON_ANGER;
 
 
 public class MainFragment_1 extends Fragment implements View.OnClickListener {
+
+    int spinnerPosition = 0;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -58,12 +62,11 @@ public class MainFragment_1 extends Fragment implements View.OnClickListener {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                spinnerPosition = position;
+
                 Button btnAccept = rootView.findViewById(R.id.btnReasonAnger);
                 if(position > 0){
                     btnAccept.setEnabled(true);
-                    //TODO: store reason on local DB
-
-
                 } else {
                     btnAccept.setEnabled(false);
                 }
@@ -84,6 +87,12 @@ public class MainFragment_1 extends Fragment implements View.OnClickListener {
             case R.id.btnReasonAnger:
                 Log.d(Constants.LOG_TAG, "onClick btnReasonAnger");
                 ((MainActivity) getActivity()).setSubFragment(Constants.SUBFRAGMENT_MAIN.get(2));
+
+                SqliteHandler db = new SqliteHandler(getContext());
+                AngerLevel lastAngerLevel = db.getLastAngerLevel();
+
+                db.insertReasonAnger(lastAngerLevel.getId(), spinnerPosition);
+
                 break;
         }
 

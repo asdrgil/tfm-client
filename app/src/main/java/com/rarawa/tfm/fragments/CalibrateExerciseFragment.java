@@ -40,7 +40,6 @@ public class CalibrateExerciseFragment extends Fragment implements View.OnClickL
 
     Chronometer chronometer;
 
-    //TODO
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 

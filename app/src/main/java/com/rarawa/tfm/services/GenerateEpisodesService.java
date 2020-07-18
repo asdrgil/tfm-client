@@ -32,6 +32,8 @@ public class GenerateEpisodesService extends Service  {
 
 
                 for(int i = 0; i < Constants.NUMBER_WEAVES; i++) {
+                    generateValue(db, 0);
+
                     //First half of the wave
                     for(int j = 0; j < 4; j++) {
                         generateValue(db, j);
@@ -52,7 +54,6 @@ public class GenerateEpisodesService extends Service  {
         long currentTimestamp = System.currentTimeMillis();
         db.insertAngerLevel(currentTimestamp, currentAngerLevel);
 
-        //TODO: change it to a String containing the long and the int and parse it
         String message = String.format("%d,%d", currentAngerLevel, currentTimestamp);
 
         Intent intent = new Intent("RESULT");

@@ -8,11 +8,13 @@ import com.rarawa.tfm.sqlite.controllers.AngerLevelHandler;
 import com.rarawa.tfm.sqlite.controllers.CalibrateSleepHandler;
 import com.rarawa.tfm.sqlite.controllers.CalibrateExerciseHandler;
 import com.rarawa.tfm.sqlite.controllers.PatternsHandler;
+import com.rarawa.tfm.sqlite.controllers.ReasonAngerHandler;
 import com.rarawa.tfm.sqlite.controllers.UserInfoHandler;
 import com.rarawa.tfm.sqlite.models.AngerLevel;
 import com.rarawa.tfm.sqlite.models.CalibrateSleep;
 import com.rarawa.tfm.sqlite.models.CalibrateExercise;
 import com.rarawa.tfm.sqlite.models.Patterns;
+import com.rarawa.tfm.sqlite.models.ReasonAnger;
 import com.rarawa.tfm.sqlite.models.UserInfo;
 import com.rarawa.tfm.utils.Constants;
 
@@ -23,6 +25,7 @@ public class SqliteHandler extends SQLiteOpenHelper {
     UserInfoHandler userInfoHandler;
     PatternsHandler patternsHandler;
     AngerLevelHandler angerLevelHandler;
+    ReasonAngerHandler reasonAngerHandler;
 
     public SqliteHandler(Context context) {
         super(context, Constants.SQLITE_DB_NAME, null, Constants.SQLITE_VERSION);
@@ -31,6 +34,7 @@ public class SqliteHandler extends SQLiteOpenHelper {
         userInfoHandler = new UserInfoHandler(context);
         patternsHandler = new PatternsHandler(context);
         angerLevelHandler = new AngerLevelHandler(context);
+        reasonAngerHandler = new ReasonAngerHandler(context);
     }
 
     public void onCreate(SQLiteDatabase db) {
@@ -39,6 +43,7 @@ public class SqliteHandler extends SQLiteOpenHelper {
         db.execSQL(CalibrateExercise.CREATE_TABLE);
         db.execSQL(Patterns.CREATE_TABLE);
         db.execSQL(AngerLevel.CREATE_TABLE);
+        db.execSQL(ReasonAnger.CREATE_TABLE);
     }
 
     @Override
@@ -48,6 +53,7 @@ public class SqliteHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + CalibrateExercise.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + Patterns.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + AngerLevel.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + ReasonAnger.TABLE_NAME);
         onCreate(db);
     }
 
@@ -171,8 +177,12 @@ public class SqliteHandler extends SQLiteOpenHelper {
         return patternsHandler.getRandomPatternByAngerLevel(angerLevel, this.getReadableDatabase());
     }
 
-    public AngerLevel getAngerLevel(long timestamp){
-        return angerLevelHandler.getAngerLevel(timestamp, this.getReadableDatabase());
+    public AngerLevel getAngerLevelById(int id){
+        return angerLevelHandler.getAngerLevelById(id, this.getReadableDatabase());
+    }
+
+    public AngerLevel getAngerLevelByTimestamp(long timestamp){
+        return angerLevelHandler.getAngerLevelByTimestamp(timestamp, this.getReadableDatabase());
     }
 
     public AngerLevel getLastAngerLevel(){
@@ -191,5 +201,16 @@ public class SqliteHandler extends SQLiteOpenHelper {
     /*public boolean isOneMinRestAngerLevel(){
         return angerLevelHandler.isOneMinRestAngerLevel(this.getReadableDatabase());
     }*/
+
+    /* REASONANGER METHODS */
+
+    public void insertReasonAnger(int idFirstAngerLevel, int reasonAnger){
+        reasonAngerHandler.insertReasonAnger(
+                idFirstAngerLevel, reasonAnger, this.getWritableDatabase());
+    }
+
+    public ReasonAnger getReasonAnger(int idFirstAngerLevel){
+        return reasonAngerHandler.getReasonAnger(idFirstAngerLevel, this.getReadableDatabase());
+    }
 
 }

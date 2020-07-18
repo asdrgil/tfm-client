@@ -25,8 +25,8 @@
             android:textColor="@color/black"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/textPatternValueOld"
-            android:layout_marginTop="30dp"/>
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="50dp"/>
 
         <TextView
             android:id="@+id/textPatternValueOld"
@@ -40,10 +40,9 @@
             android:textAlignment="center"
             android:textSize="20dp"
             android:textStyle="bold|italic"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textPatternInfoOld"
+            app:layout_constraintStart_toStartOf="@+id/textPatternInfoOld"
+            app:layout_constraintEnd_toEndOf="@+id/textPatternInfoOld"
             android:background="@layout/border"
             android:layout_marginTop="15dp"/>
 

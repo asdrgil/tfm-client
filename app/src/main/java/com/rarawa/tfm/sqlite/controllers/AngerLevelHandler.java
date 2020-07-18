@@ -49,7 +49,34 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
 
     }
 
-    public AngerLevel getAngerLevel(long timestamp, SQLiteDatabase db){
+    public AngerLevel getAngerLevelById(int id, SQLiteDatabase db){
+        Cursor cursor = db.query(AngerLevel.TABLE_NAME,
+                new String[]{AngerLevel.COLUMN_ID, AngerLevel.COLUMN_TIMESTAMP,
+                        AngerLevel.COLUMN_ANGER_LEVEL, AngerLevel.COLUMN_SUGGESTED_PATTERN,
+                        AngerLevel.COLUMN_USEFULNESS_PATTERN, AngerLevel.COLUMN_COMMENT_PATTERN},
+                AngerLevel.COLUMN_ID + "=?",
+                new String[]{String.valueOf(id)},
+                null, null, null, null);
+
+        if (cursor != null)
+            cursor.moveToFirst();
+        else
+            return null;
+
+        AngerLevel note = new AngerLevel(
+                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ID)),
+                cursor.getLong(cursor.getColumnIndex(AngerLevel.COLUMN_TIMESTAMP)),
+                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ANGER_LEVEL)),
+                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_SUGGESTED_PATTERN)),
+                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_USEFULNESS_PATTERN)),
+                cursor.getString(cursor.getColumnIndex(AngerLevel.COLUMN_SUGGESTED_PATTERN)));
+
+        cursor.close();
+
+        return note;
+    }
+
+    public AngerLevel getAngerLevelByTimestamp(long timestamp, SQLiteDatabase db){
         Cursor cursor = db.query(AngerLevel.TABLE_NAME,
                 new String[]{AngerLevel.COLUMN_ID, AngerLevel.COLUMN_TIMESTAMP,
                         AngerLevel.COLUMN_ANGER_LEVEL, AngerLevel.COLUMN_SUGGESTED_PATTERN,
