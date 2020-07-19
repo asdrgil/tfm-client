@@ -4,7 +4,7 @@
     <string name="title_activity_settings">Ajustes</string>
 
     <string name="register_token_length">El token debe tener seis caracteres.</string>
-    <string name="register_token_invalid">El token introducido no es válido.</string>
+    <string name="register_token_invalid">El token introducido no es correcto.</string>
     <string name="register_token_internet_error">En este momento no se puede acceder a
         la página del servidor. Por favor, revisa tu conexión a Internet.</string>
 

@@ -2,6 +2,7 @@ package com.rarawa.tfm.utils;
 
 import android.content.Context;
 import android.os.Handler;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
 
 import com.android.volley.AuthFailureError;
@@ -13,6 +14,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.codesnippets4all.json.parsers.JSONParser;
 import com.codesnippets4all.json.parsers.JsonParserFactory;
+import com.rarawa.tfm.MainActivity;
 import com.rarawa.tfm.sqlite.SqliteHandler;
 import com.rarawa.tfm.sqlite.models.UserInfo;
 
@@ -74,6 +76,44 @@ public class ApiRest {
             }
         };
         requestQueue.add(stringRequest);
+
+    }
+
+    //Get pattern's updates from the server
+    public static int registerPatient(final Context context, String registerToken){
+        final int[] result = {1};
+
+        SqliteHandler db = new SqliteHandler(context);
+
+        //communicationToken
+        final ApiRest jsonParserVolley = new ApiRest(context, Constants.SYNC_DEVICE_URL.concat(registerToken));
+        jsonParserVolley.executeRequest(Request.Method.GET, new ApiRest.VolleyCallback() {
+            @Override
+            public void getResponse(Document response) {
+
+                //Error
+                if(response.containsKey("code") && Integer.parseInt(response.get("code").toString()) < 0){
+                    result[0] = -1;
+                } else {
+
+                    db.insertUserInfo(response.get("name").toString(),
+                            response.get("surname1").toString(),
+                            response.get("surname2").toString(),
+                            Integer.parseInt(response.get("age").toString()),
+                            response.get("gender").toString(),
+                            response.get("communicationToken").toString());
+
+                    MainActivity.setDrawableRegister(
+                            response.get("name").toString(),
+                            response.get("surname1").toString(),
+                            response.get("surname2").toString());
+
+                    result[0] = 1;
+                }
+            }
+        });
+
+        return result[0];
 
     }
 

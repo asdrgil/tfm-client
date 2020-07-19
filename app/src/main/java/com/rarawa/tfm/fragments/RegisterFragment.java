@@ -16,6 +16,7 @@ import com.android.volley.Request;
 import com.rarawa.tfm.MainActivity;
 import com.rarawa.tfm.R;
 import com.rarawa.tfm.sqlite.SqliteHandler;
+import com.rarawa.tfm.sqlite.models.UserInfo;
 import com.rarawa.tfm.utils.ApiRest;
 import com.rarawa.tfm.utils.Constants;
 
@@ -31,6 +32,7 @@ import java.util.Date;
 public class RegisterFragment extends Fragment implements View.OnClickListener {
     TextInputLayout layoutToken;
     EditText editToken;
+    Button btnSend;
 
     SqliteHandler db;
     boolean registered;
@@ -46,7 +48,7 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
             rootView = inflater.inflate(R.layout.fragment_register, container, false);
             editToken = rootView.findViewById(R.id.inputTokenText);
             layoutToken = rootView.findViewById(R.id.inputTokenLayout);
-            Button btnSend = rootView.findViewById(R.id.btnSendToken);
+            btnSend = rootView.findViewById(R.id.btnSendToken);
             btnSend.setOnClickListener(this);
         } else {
             rootView = inflater.inflate(R.layout.fragment_register_done, container, false);
@@ -76,6 +78,12 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View view) {
+
+        //Avoids that the button is clicked several times before receiving the result
+        btnSend.setEnabled(false);
+
+        Log.d(Constants.LOG_TAG, "onClick register");
+
         String token = editToken.getText().toString();
 
         //Invalid token length
@@ -84,37 +92,24 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
         } else {
             //HTTP GET
 
-            final ApiRest jsonParserVolley = new ApiRest(getContext(), Constants.SYNC_DEVICE_URL.concat(token));
-            //TODO
-            /*jsonParserVolley.executeRequest(Request.Method.GET, new ApiRest.VolleyCallback() {
-                @Override
-                public void getResponse(Map response) {
-                    //Error
-                    if(Integer.parseInt(response.get("code").toString()) < 0){
-                        layoutToken.setError(response.get("message").toString());
+            int result = ApiRest.registerPatient(getContext(), token);
 
-                    //Register user in the local database
-                    } else {
+            Log.d(Constants.LOG_TAG, "result: " + result);
 
-                        db.insertUserInfo(response.get("name").toString(),
-                                response.get("surname1").toString(),
-                                response.get("surname2").toString(),
-                                Integer.parseInt(response.get("age").toString()),
-                                response.get("gender").toString(),
-                                response.get("communicationToken").toString());
+            //OK
+            if(result > 0){
+                Log.d(Constants.LOG_TAG, "db.userInfoExists(): True");
 
+                ((MainActivity) getActivity()).setFragment(Constants.FRAGMENT_INDEX_NOT_CALIBRATED,
+                        "Paciente registrado correctamente.", Snackbar.LENGTH_LONG);
 
+            //ERROR
+            } else {
+                Log.d(Constants.LOG_TAG, "db.userInfoExists(): False");
 
-                        ((MainActivity) getActivity()).setDrawableRegister(
-                                response.get("name").toString(),
-                                response.get("surname1").toString(),
-                                response.get("surname2").toString());
-
-                        ((MainActivity) getActivity()).setFragment(Constants.FRAGMENT_INDEX,
-                                "Paciente registrado correctamente.", Snackbar.LENGTH_SHORT);
-                    }
-                }
-            });*/
+                layoutToken.setError(getResources().getText(R.string.register_token_invalid));
+                btnSend.setEnabled(true);
+            }
         }
     }
 }

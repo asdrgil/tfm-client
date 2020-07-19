@@ -59,8 +59,12 @@ public class UserInfoHandler extends SQLiteOpenHelper {
                 new String[]{String.valueOf(id)},
                 null, null, null, null);
 
-        if (cursor != null)
+        if (cursor != null) {
             cursor.moveToFirst();
+        } else {
+            cursor.close();
+            return null;
+        }
 
         UserInfo note = new UserInfo(
                 cursor.getInt(cursor.getColumnIndex(UserInfo.COLUMN_ID)),

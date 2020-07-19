@@ -16,8 +16,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
-import android.media.Image;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.design.widget.CoordinatorLayout;
@@ -34,7 +32,9 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -53,6 +53,7 @@ import com.rarawa.tfm.services.GenerateEpisodesService;
 import com.rarawa.tfm.sqlite.SqliteHandler;
 import com.rarawa.tfm.sqlite.models.Patterns;
 import com.rarawa.tfm.sqlite.models.UserInfo;
+import com.rarawa.tfm.utils.ApiRest;
 import com.rarawa.tfm.utils.Constants;
 
 import java.util.Map;
@@ -79,12 +80,17 @@ public class MainActivity extends AppCompatActivity {
     boolean mServiceBound = false;
     BroadcastReceiver receiver;
 
+    private static TextView username;
+    private static NavigationView navigationView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        username =  findViewById(R.id.menu_username);
+        navigationView = findViewById(R.id.navigation_view);
 
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
 
@@ -129,6 +135,8 @@ public class MainActivity extends AppCompatActivity {
                             findViewById(R.id.textLevel), currentAngerLevel);
 
                     updatePattern(context, currentAngerLevel);
+
+                    ApiRest.callUpdatePatternsPatient(getApplicationContext());
                 }
             };
         }
@@ -493,7 +501,7 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-    public void setDrawableRegister(String name, String surname1, String surname2){
+    public static void setDrawableRegister(String name, String surname1, String surname2){
         //Set literal of the drawable
         String literalName;
 
@@ -504,11 +512,13 @@ public class MainActivity extends AppCompatActivity {
             literalName = String.format("%s %s %s", name, surname1, surname2);
         }
 
-        TextView username =  findViewById(R.id.menu_username);
+        username = navigationView.findViewById(R.id.menu_username);
+
+        Log.d(Constants.LOG_TAG, "usernameId: " + username.getId());
+
         username.setText(literalName);
 
         //Set calibrate as enabled
-        NavigationView navigationView = findViewById(R.id.navigation_view);
         Menu menu = navigationView.getMenu();
 
         MenuItem item_calibrate = menu.findItem(R.id.item_navigation_drawer_calibrate);
@@ -521,6 +531,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setFragment(String id, String snackbar, int length) {
+        //Hide keyboard before loading the next fragment so that if a snackbar is being
+        //displayed, it can be correctly seeing. In general, this improves a bit the UX
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
@@ -603,8 +621,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static void snackbar(String text, int length){
+        Log.d(Constants.LOG_TAG, "Inside snackbar");
 
-        //TODO: find coordinatorLayout
         Snackbar snackbar = Snackbar
                 .make(coordinatorLayout, text, length);
 
@@ -625,25 +643,31 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        LocalBroadcastManager.getInstance(this).registerReceiver((receiver),
-                new IntentFilter("RESULT")
-        );
+        if(registered && calibrated) {
+            LocalBroadcastManager.getInstance(this).registerReceiver((receiver),
+                    new IntentFilter("RESULT")
+            );
 
-        Intent intent = new Intent(this, GenerateEpisodesService.class);
-        startService(intent);
-        bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+            Intent intent = new Intent(this, GenerateEpisodesService.class);
+            startService(intent);
+            bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        }
 
 
     }
 
     @Override
     protected void onStop() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
-        super.onStop();
-        if (mServiceBound) {
-            unbindService(mServiceConnection);
-            mServiceBound = false;
+
+        if(registered && calibrated) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+            if (mServiceBound) {
+                unbindService(mServiceConnection);
+                mServiceBound = false;
+            }
         }
+
+        super.onStop();
     }
 
     private ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -660,5 +684,6 @@ public class MainActivity extends AppCompatActivity {
             mServiceBound = true;
         }
     };
+
 
 }
