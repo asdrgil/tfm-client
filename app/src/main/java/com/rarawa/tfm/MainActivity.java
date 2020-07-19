@@ -89,7 +89,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        username =  findViewById(R.id.menu_username);
         navigationView = findViewById(R.id.navigation_view);
 
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
@@ -106,7 +105,6 @@ public class MainActivity extends AppCompatActivity {
 
         drawerLayout = findViewById(R.id.activity_main_layout);
 
-
         //startBLEStreaming();
         int calibrateSleep = db.calibrateSleepExists();
         int calibrateExercise = db.calibrateExerciseExists();
@@ -115,8 +113,9 @@ public class MainActivity extends AppCompatActivity {
 
         updateNavigationView();
 
-        /*Log.d(Constants.LOG_TAG, "calibrated: " + calibrated);
-        Log.d(Constants.LOG_TAG, "registered: " + registered);*/
+        username = findViewById(R.id.menu_username);
+        //TODO: not working because username's findViewById returns null. FIX IT.
+        //setNameLiteralMenu();
 
         if(registered && calibrated) {
             receiver = new BroadcastReceiver() {
@@ -164,8 +163,8 @@ public class MainActivity extends AppCompatActivity {
         if(currentPatternUnparsed.length() == 0 && currentAngerLevel > 0){
             sharedPrefEditor.putString(Constants.SHAREDPREFERENCES_CURRENT_PATTERN, newPattenUnparsed);
 
-        //There is an active pattern and the angerLevel is over zero
-        //It does not matter if there was a queued pattern or not, it's overwritten
+            //There is an active pattern and the angerLevel is over zero
+            //It does not matter if there was a queued pattern or not, it's overwritten
         } else if(currentPatternUnparsed.length() > 0 && currentAngerLevel > 0){
             sharedPrefEditor.putString(Constants.SHAREDPREFERENCES_NEXT_PATTERN, newPattenUnparsed);
         }
@@ -501,7 +500,29 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-    public static void setDrawableRegister(String name, String surname1, String surname2){
+    public static void setDrawableRegister(){
+        if(!db.userInfoExists()){
+            return;
+        }
+
+        setNameLiteralMenu();
+
+        //Set calibrate as enabled
+        Menu menu = navigationView.getMenu();
+
+        MenuItem item_calibrate = menu.findItem(R.id.item_navigation_drawer_calibrate);
+        item_calibrate.setEnabled(true);
+    }
+
+    public static void setNameLiteralMenu(){
+        if(!db.userInfoExists()){
+            return;
+        }
+
+        String name = db.getUserInfo().getName();
+        String surname1 = db.getUserInfo().getSurname1();
+        String surname2 = db.getUserInfo().getSurname2();
+
         //Set literal of the drawable
         String literalName;
 
@@ -512,17 +533,7 @@ public class MainActivity extends AppCompatActivity {
             literalName = String.format("%s %s %s", name, surname1, surname2);
         }
 
-        username = navigationView.findViewById(R.id.menu_username);
-
-        Log.d(Constants.LOG_TAG, "usernameId: " + username.getId());
-
         username.setText(literalName);
-
-        //Set calibrate as enabled
-        Menu menu = navigationView.getMenu();
-
-        MenuItem item_calibrate = menu.findItem(R.id.item_navigation_drawer_calibrate);
-        item_calibrate.setEnabled(true);
     }
 
     public void setFragment(String id) {

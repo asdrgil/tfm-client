@@ -25,7 +25,7 @@
 
     <!-- Calibrate sleep fragment-->
     <string name="calibrate_sleep_info">Indica cuándo te vas a dormir y cuándo te acuestas</string>
-    <string name="calibrate_sleep_info2">Nota: el tiempo entre que se acuesta y se despierta debe
+    <string name="calibrate_sleep_info2">Nota: el tiempo entre que te acuestas y te despiertas debe
         ser de al menos dos horas.</string>
     <string name="calibrate_sleep_info3">Te acostaste a las [horas]</string>
 

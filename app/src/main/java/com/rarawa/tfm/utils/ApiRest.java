@@ -103,10 +103,7 @@ public class ApiRest {
                             response.get("gender").toString(),
                             response.get("communicationToken").toString());
 
-                    MainActivity.setDrawableRegister(
-                            response.get("name").toString(),
-                            response.get("surname1").toString(),
-                            response.get("surname2").toString());
+                    MainActivity.setDrawableRegister();
 
                     result[0] = 1;
                 }
