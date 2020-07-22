@@ -36,6 +36,8 @@ public class MainFragment_3 extends Fragment implements View.OnClickListener {
         Button btnUsefulnessPattern = rootView.findViewById(R.id.btnUsefulnessPattern);
         btnUsefulnessPattern.setOnClickListener(this);
 
+        displayOldPattern(rootView);
+
         return rootView;
     }
 
@@ -48,7 +50,7 @@ public class MainFragment_3 extends Fragment implements View.OnClickListener {
                 Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
 
         String oldPatternUnparsed =
-                sharedPref.getString(Constants.SHAREDPREFERENCES_NEXT_PATTERN, "");
+                sharedPref.getString(Constants.SHAREDPREFERENCES_CURRENT_PATTERN, "");
 
         String [] oldPatternElements =  oldPatternUnparsed.split(",");
         String  oldPatternText = oldPatternElements[1];

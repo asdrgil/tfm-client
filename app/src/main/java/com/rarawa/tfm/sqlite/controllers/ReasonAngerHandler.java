@@ -26,7 +26,6 @@ public class ReasonAngerHandler extends SQLiteOpenHelper {
     }
 
     public long insertReasonAnger(int idFirstAngerLevel, int reasonAnger, SQLiteDatabase db){
-        db.execSQL(ReasonAnger.CREATE_TABLE); //DEBUG
 
         ContentValues values = new ContentValues();
 

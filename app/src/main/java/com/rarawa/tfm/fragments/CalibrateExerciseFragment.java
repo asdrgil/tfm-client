@@ -7,6 +7,8 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -14,6 +16,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -112,9 +115,25 @@ public class CalibrateExerciseFragment extends Fragment implements View.OnClickL
                         notificationManager.notify(1, notification);
                     }
 
+                    Log.d(Constants.LOG_TAG, "calling db.insertEndExercise()");
+
                     db.insertEndExercise();
 
-                    ((MainActivity) getActivity()).setFragment(Constants.FRAGMENT_MAIN, getResources().getText(R.string.calibrate_exercise_info3).toString(), Snackbar.LENGTH_LONG);
+                    if(db.calibrateSleepExists() < 3) {
+                        ((MainActivity) getActivity())
+                                .setFragment(Constants.FRAGMENT_CALIBRATE,
+                                        getResources().getText(R.string.calibrate_exercise_info3).toString(),
+                                        Snackbar.LENGTH_LONG);
+                    } else {
+                        SharedPreferences sharedPref = getContext().getSharedPreferences(
+                                Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
+                        SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
+                        sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_MESSAGE_CALIBRATED, 1);
+                        sharedPrefEditor.commit();
+
+                        Intent intent = new Intent(getActivity(), MainActivity.class);
+                        startActivity(intent);
+                    }
                 }
             }
         });

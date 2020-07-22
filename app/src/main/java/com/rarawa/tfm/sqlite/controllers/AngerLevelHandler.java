@@ -3,11 +3,14 @@ package com.rarawa.tfm.sqlite.controllers;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import com.rarawa.tfm.sqlite.models.AngerLevel;
+import com.rarawa.tfm.sqlite.models.Patterns;
 import com.rarawa.tfm.utils.Constants;
 
 public class AngerLevelHandler extends SQLiteOpenHelper {
@@ -135,7 +138,6 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
         return note;
     }
 
-    //TODO: test
     public AngerLevel getPenultimateAngerLevel(SQLiteDatabase db){
         Cursor cursor = db.query(AngerLevel.TABLE_NAME,
                 new String[]{AngerLevel.COLUMN_ID, AngerLevel.COLUMN_TIMESTAMP,
@@ -186,9 +188,4 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
         db.update(AngerLevel.TABLE_NAME, values, AngerLevel.COLUMN_TIMESTAMP + " = ?",
                 new String[]{String.valueOf(angerLevel.getTimestamp())});
     }
-
-    //TODO
-    /*public boolean isOneMinRestAngerLevel(SQLiteDatabase db){
-        long currentTimestamp = System.currentTimeMillis();
-    }*/
 }

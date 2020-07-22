@@ -17,6 +17,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
@@ -59,6 +60,8 @@ import com.rarawa.tfm.utils.Constants;
 import java.util.Map;
 import java.util.UUID;
 
+import static java.lang.reflect.Array.getInt;
+
 public class MainActivity extends AppCompatActivity {
 
     private static CoordinatorLayout coordinatorLayout;
@@ -86,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -117,27 +121,57 @@ public class MainActivity extends AppCompatActivity {
         //TODO: not working because username's findViewById returns null. FIX IT.
         //setNameLiteralMenu();
 
-        if(registered && calibrated) {
-            receiver = new BroadcastReceiver() {
+        if(registered){
+            //Get updated patterns for the patient periodically
+            Handler handler = new Handler();
+
+            Runnable runnableCode = new Runnable() {
                 @Override
-                public void onReceive(Context context, Intent intent) {
-                    String message = intent.getStringExtra("MESSAGE");
-                    Log.d(Constants.LOG_TAG, "Received string: " + message);
-
-                    String messsageArr[] = message.split(",");
-                    int currentAngerLevel = Integer.parseInt(messsageArr[0]);
-
-                    //TODO:get and store the new recommended pattern
-
-                    updateMainSubFragment(context, currentAngerLevel);
-                    updateThermometer(findViewById(R.id.thermoIcon),
-                            findViewById(R.id.textLevel), currentAngerLevel);
-
-                    updatePattern(context, currentAngerLevel);
-
+                public void run() {
                     ApiRest.callUpdatePatternsPatient(getApplicationContext());
+                    handler.postDelayed(this, Constants.UPDATE_PATTERNS_FREQUENCY);
                 }
             };
+
+            handler.post(runnableCode);
+
+            if(calibrated) {
+                SharedPreferences sharedPref = getBaseContext().getSharedPreferences(
+                        Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
+
+                int showSnackbarCalibrated =
+                        sharedPref.getInt(Constants.SHAREDPREFERENCES_MESSAGE_CALIBRATED, 0);
+
+                if(showSnackbarCalibrated > 0){
+                    SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
+                    sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_MESSAGE_CALIBRATED, 0);
+                    sharedPrefEditor.commit();
+
+                    snackbar(getResources().getText(R.string.calibrate_exercise_info3).toString(),
+                            Snackbar.LENGTH_LONG);
+                }
+
+                //getResources().getText(R.string.calibrate_exercise_info3).toString()
+
+                receiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        String message = intent.getStringExtra("MESSAGE");
+                        Log.d(Constants.LOG_TAG, "Received string: " + message);
+
+                        String messsageArr[] = message.split(",");
+                        int currentAngerLevel = Integer.parseInt(messsageArr[0]);
+
+                        //TODO:get and store the new recommended pattern
+
+                        updateMainSubFragment(context, currentAngerLevel);
+                        updateThermometer(findViewById(R.id.thermoIcon),
+                                findViewById(R.id.textLevel), currentAngerLevel);
+
+                        updatePattern(context, currentAngerLevel);
+                    }
+                };
+            }
         }
     }
 
@@ -152,21 +186,29 @@ public class MainActivity extends AppCompatActivity {
         String newPattenUnparsed = "";
 
         if(currentAngerLevel > 0){
+            boolean isNull = db.getRandomPatternByAngerLevel(currentAngerLevel) == null;
+
+            Log.d(Constants.LOG_TAG, "randomPattern: " + String.valueOf(isNull));
+
             Patterns newPattern = db.getRandomPatternByAngerLevel(currentAngerLevel);
-            newPattenUnparsed = String.format("%d,%s",newPattern.getId(), newPattern.getName());
+
+            if(newPattern != null){
+                newPattenUnparsed = String.format("%d,%s",newPattern.getId(), newPattern.getName());
+            } else {
+                //TODO: improve message?
+                newPattenUnparsed = String.format("%d,%s", 0,
+                        "No hay pautas definidas para este nivel de ira. Consulta con tu terapeuta.");
+            }
         } else {
             newPattenUnparsed = "";
-            sharedPrefEditor.putString(Constants.SHAREDPREFERENCES_NEXT_PATTERN, newPattenUnparsed);
         }
 
-        //There is no active pattern and the angerLevel is over zero
-        if(currentPatternUnparsed.length() == 0 && currentAngerLevel > 0){
-            sharedPrefEditor.putString(Constants.SHAREDPREFERENCES_CURRENT_PATTERN, newPattenUnparsed);
-
-            //There is an active pattern and the angerLevel is over zero
-            //It does not matter if there was a queued pattern or not, it's overwritten
-        } else if(currentPatternUnparsed.length() > 0 && currentAngerLevel > 0){
+        //If there is already an active pattern, queue the new one
+        if(currentPatternUnparsed.length() > 0){
             sharedPrefEditor.putString(Constants.SHAREDPREFERENCES_NEXT_PATTERN, newPattenUnparsed);
+        //Else, the new pattern is the active pattern
+        } else {
+            sharedPrefEditor.putString(Constants.SHAREDPREFERENCES_CURRENT_PATTERN, newPattenUnparsed);
         }
 
         sharedPrefEditor.apply();
@@ -181,14 +223,43 @@ public class MainActivity extends AppCompatActivity {
         Log.d(Constants.LOG_TAG, "currentAngerLevel:" + currentAngerLevel);
         Log.d(Constants.LOG_TAG, "mainFragmentPref:" + mainFragmentPref);
 
-        //Load mainFragment_1
-        if(currentAngerLevel > 0 && mainFragmentPref == 0){
-            Log.d(Constants.LOG_TAG, "currentAngerLevel > 0 && mainFragmentPref == 0");
+        long firstTmpPlateau =
+                sharedPref.getLong(Constants.SHAREDPREFERENCES_FIRST_ZERO_LEVEL_PLATEAU, 0);
 
-            setSubFragment(Constants.SUBFRAGMENT_MAIN.get(1));
+        boolean isOneMinuteRest = System.currentTimeMillis() - firstTmpPlateau >=
+                Constants.TIME_EPISODE_IS_OBSOLETE;
+
+        if(currentAngerLevel == 0 && firstTmpPlateau == 0){
+            SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
+            sharedPrefEditor.putLong(Constants.SHAREDPREFERENCES_FIRST_ZERO_LEVEL_PLATEAU,
+                    System.currentTimeMillis());
+            sharedPrefEditor.commit();
         }
 
-        //TODO: else if db.LastAngerLevelMinuteZero && mainFragmentPref > 0 => Load mainFragment_0
+        //Load mainFragment_1
+        if(currentAngerLevel > 0){
+            SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
+            sharedPrefEditor.putLong(Constants.SHAREDPREFERENCES_FIRST_ZERO_LEVEL_PLATEAU, 0);
+            sharedPrefEditor.commit();
+
+            if(mainFragmentPref == 0) {
+                Log.d(Constants.LOG_TAG, "currentAngerLevel > 0 && mainFragmentPref == 0");
+                setSubFragment(Constants.SUBFRAGMENT_MAIN.get(1));
+            }
+
+        //If there has been a whole minute without an episode and the user has not finished
+        //interacting with the previous episode => Discard the episode and upload the main fragment
+        //used for the case when there are no episodes.
+        } else if (mainFragmentPref > 0 && isOneMinuteRest){
+            Log.d(Constants.LOG_TAG, "isOneMinuteRest clause");
+
+            SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
+            sharedPrefEditor.putString(Constants.SHAREDPREFERENCES_CURRENT_PATTERN, "");
+            sharedPrefEditor.putString(Constants.SHAREDPREFERENCES_NEXT_PATTERN, "");
+            sharedPrefEditor.apply();
+
+            setSubFragment(Constants.SUBFRAGMENT_MAIN.get(0));
+        }
 
     }
 
@@ -206,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /** BLE variables **/
+    /** BLE variables and methods **/
 
     private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
         @Override
@@ -505,7 +576,8 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        setNameLiteralMenu();
+        //TODO
+        //setNameLiteralMenu();
 
         //Set calibrate as enabled
         Menu menu = navigationView.getMenu();
@@ -513,6 +585,7 @@ public class MainActivity extends AppCompatActivity {
         MenuItem item_calibrate = menu.findItem(R.id.item_navigation_drawer_calibrate);
         item_calibrate.setEnabled(true);
     }
+
 
     public static void setNameLiteralMenu(){
         if(!db.userInfoExists()){
@@ -576,6 +649,7 @@ public class MainActivity extends AppCompatActivity {
                 fragmentTransaction.replace(R.id.fragment, calibrateSleepFragment);
                 break;
             case Constants.FRAGMENT_CALIBRATE_EXERCISE:
+                Log.d(Constants.LOG_TAG, "FRAGMENT_CALIBRATE_EXERCISE");
                 CalibrateExerciseFragment calibrateExerciseFragment = new CalibrateExerciseFragment();
                 fragmentTransaction.replace(R.id.fragment, calibrateExerciseFragment);
                 break;

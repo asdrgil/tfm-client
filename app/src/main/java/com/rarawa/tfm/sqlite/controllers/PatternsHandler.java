@@ -3,6 +3,7 @@ package com.rarawa.tfm.sqlite.controllers;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -77,10 +78,18 @@ public class PatternsHandler extends SQLiteOpenHelper {
         else
             return null;
 
-        Patterns note = new Patterns(
-                cursor.getInt(cursor.getColumnIndex(Patterns.COLUMN_ID)),
-                cursor.getString(cursor.getColumnIndex(Patterns.COLUMN_NAME)),
-                cursor.getString(cursor.getColumnIndex(Patterns.COLUMN_INTENSITIES)));
+        Patterns note;
+
+        try{
+            note = new Patterns(
+                    cursor.getInt(cursor.getColumnIndex(Patterns.COLUMN_ID)),
+                    cursor.getString(cursor.getColumnIndex(Patterns.COLUMN_NAME)),
+                    cursor.getString(cursor.getColumnIndex(Patterns.COLUMN_INTENSITIES)));
+        } catch (CursorIndexOutOfBoundsException e){
+            return null;
+        }
+
+
 
         cursor.close();
 

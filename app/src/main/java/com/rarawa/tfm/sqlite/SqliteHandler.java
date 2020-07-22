@@ -197,11 +197,6 @@ public class SqliteHandler extends SQLiteOpenHelper {
         angerLevelHandler.updateAngerLevel(angerLevel, this.getWritableDatabase());
     }
 
-    //TODO
-    /*public boolean isOneMinRestAngerLevel(){
-        return angerLevelHandler.isOneMinRestAngerLevel(this.getReadableDatabase());
-    }*/
-
     /* REASONANGER METHODS */
 
     public void insertReasonAnger(int idFirstAngerLevel, int reasonAnger){

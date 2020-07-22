@@ -34,23 +34,12 @@ public class MainFragment extends Fragment {
                 Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
 
         SqliteHandler db = new SqliteHandler(getContext());
-        AngerLevel lastAngerLevel = db.getLastAngerLevel();
-
-        Log.d(Constants.LOG_TAG, "lastAngerLevel.getAngerLevel(): " + lastAngerLevel.getAngerLevel());
-
-        /*if(lastAngerLevel.getAngerLevel() == 0){
-            Log.d(Constants.LOG_TAG, "angerLevel == 0");
-            ((MainActivity) getActivity()).setSubFragment(Constants.SUBFRAGMENT_MAIN.get(0));
-        } else {*/
 
         Log.d(Constants.LOG_TAG, "mainFragment->subfragment");
         int mainFragment =
                 sharedPref.getInt(Constants.SHAREDPREFERENCES_FRAGMENT_MAIN, 0);
         ((MainActivity) getActivity())
                 .setSubFragment(Constants.SUBFRAGMENT_MAIN.get(mainFragment));
-
-        //}
-
 
         return rootView;
     }

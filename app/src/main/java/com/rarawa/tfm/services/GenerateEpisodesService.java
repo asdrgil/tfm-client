@@ -44,6 +44,11 @@ public class GenerateEpisodesService extends Service  {
                         generateValue(db, j);
                     }
                 }
+
+                //DEBUG for trying if isOneMinuteRest works. Delete it after trial.
+                for(int i = 0; i < 30; i++){
+                    generateValue(db, 0);
+                }
             }
         }).start();
 
@@ -55,6 +60,8 @@ public class GenerateEpisodesService extends Service  {
         db.insertAngerLevel(currentTimestamp, currentAngerLevel);
 
         String message = String.format("%d,%d", currentAngerLevel, currentTimestamp);
+
+        Log.d(LOG_TAG, "currentAngerLevel generated: " + currentAngerLevel);
 
         Intent intent = new Intent("RESULT");
         intent.putExtra("MESSAGE", message);

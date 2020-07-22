@@ -40,6 +40,7 @@ public class CalibrateFragment extends Fragment implements View.OnClickListener 
         int calibrateSleep = db.calibrateSleepExists();
         int calibrateExercise = db.calibrateExerciseExists();
 
+        //Configuration of button calibrateSleep
         if(calibrateSleep == 0){
             btnSleep.setEnabled(true);
             btnSleep.setOnClickListener(this);
@@ -49,15 +50,17 @@ public class CalibrateFragment extends Fragment implements View.OnClickListener 
             totalCalibrate++;
         }
 
-        if(calibrateExercise == 0){
+        //Configuration of button calibrateExercise
+        if(calibrateExercise < 3){
             btnExercise.setEnabled(true);
             btnExercise.setOnClickListener(this);
-        } else if(calibrateExercise == 3){
+        } else {
             btnExercise.setEnabled(false);
             btnExercise.setText(String.format("%s (hecho)", btnSleep.getText()));
             totalCalibrate++;
         }
 
+        //Configurate literal total calibrate
         if(totalCalibrate == 0){
             textCounter.setText("0/2");
             textCounter.setTextColor(getResources().getColor(R.color.red));

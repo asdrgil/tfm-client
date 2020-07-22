@@ -27,7 +27,9 @@ public class Constants {
     //and not measure some state. At this point, is when this value is useful
     public static final int MEASUREMENT_VALID_TIME = 20*1000;
     public static final int MAX_ANGER_LEVEL = 4;
-    public static final int NUMBER_WEAVES = 4;
+    public static final int NUMBER_WEAVES = 1; //DEBUG
+    public static final int UPDATE_PATTERNS_FREQUENCY = 20*60*1000; //DEBUG
+    //public static final int UPDATE_PATTERNS_FREQUENCY = 30*60*1000; //PROD
 
     /*Broadcast constants*/
     public static final String BROADCAST_ACTION = "ACTION";
@@ -107,4 +109,10 @@ public class Constants {
     public static final String SHAREDPREFERENCES_NEXT_PATTERN = "nextPattern";
     //ID of the anger level measurement that is being displayed on the screen
     public static final String SHAREDPREFERENCES_DISPLAY_ANGERLEVEL_ID = "displayAngerLevelId";
+    public static final String SHAREDPREFERENCES_MESSAGE_CALIBRATED = "messageCalibrated";
+    public static final String SHAREDPREFERENCES_FIRST_ZERO_LEVEL_PLATEAU = "firstZeroLevelPlateau";
+
+
+    //Inactive time before making the old episode obsolete
+    public static final int TIME_EPISODE_IS_OBSOLETE = 60*1000;
 }

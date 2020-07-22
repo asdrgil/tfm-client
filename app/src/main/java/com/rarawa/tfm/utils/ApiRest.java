@@ -116,6 +116,7 @@ public class ApiRest {
 
     //Get pattern's updates from the server
     public static int callUpdatePatternsPatient(final Context context){
+
         final int[] result = {1};
 
         SqliteHandler db = new SqliteHandler(context);
@@ -130,7 +131,7 @@ public class ApiRest {
                 //Error
                 if(response.containsKey("code") && Integer.parseInt(response.get("code").toString()) < 0){
                     result[0] = -1;
-                    Log.e(Constants.LOG_TAG, "callUpdatePatternsPatient: -1");
+                    Log.d(Constants.LOG_TAG, "callUpdatePatternsPatient: -1");
                 } else {
 
                     SqliteHandler db = new SqliteHandler(context);

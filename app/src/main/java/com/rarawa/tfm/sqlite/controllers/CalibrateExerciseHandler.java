@@ -62,10 +62,13 @@ public class CalibrateExerciseHandler extends SQLiteOpenHelper {
                 return -1;
             }
 
-            long currentTimeMilis = System.currentTimeMillis();
+            //This is not neccesary as it is only called when this condition is met.
 
             //It is required at least MINIMUM_EXERCISE_CALIBRATE_TIME between the start time and
             // the end time in order to calibrate the wristband.
+
+            /*long currentTimeMilis = System.currentTimeMillis();
+
             if(currentTimeMilis - exercise.getStartTimestamp() < MINIMUM_EXERCISE_CALIBRATE_TIME){
                 Log.e(Constants.LOG_TAG, "Exercise exists: -2");
                 Log.e(Constants.LOG_TAG, String.valueOf(currentTimeMilis));
@@ -73,7 +76,7 @@ public class CalibrateExerciseHandler extends SQLiteOpenHelper {
                 Log.e(Constants.LOG_TAG, String.valueOf(MINIMUM_EXERCISE_CALIBRATE_TIME));
 
                 return -2;
-            }
+            }*/
 
             //Everything went ok, write the end time
 
