@@ -3,12 +3,10 @@ package com.rarawa.tfm.sqlite.controllers;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
-import com.rarawa.tfm.sqlite.models.Patterns;
+import com.rarawa.tfm.sqlite.models.Pattern;
 import com.rarawa.tfm.utils.Constants;
 
 public class PatternsHandler extends SQLiteOpenHelper {
@@ -17,7 +15,7 @@ public class PatternsHandler extends SQLiteOpenHelper {
     }
 
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(Patterns.CREATE_TABLE);
+        db.execSQL(Pattern.CREATE_TABLE);
     }
 
     @Override
@@ -30,23 +28,23 @@ public class PatternsHandler extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
 
-        values.put(Patterns.COLUMN_ID, id);
-        values.put(Patterns.COLUMN_NAME, name);
-        values.put(Patterns.COLUMN_INTENSITIES, intensities);
+        values.put(Pattern.COLUMN_ID, id);
+        values.put(Pattern.COLUMN_NAME, name);
+        values.put(Pattern.COLUMN_INTENSITIES, intensities);
 
         //Insert new register
-        db.insert(Patterns.TABLE_NAME, null, values);
+        db.insert(Pattern.TABLE_NAME, null, values);
 
         db.close();
 
         return id;
     }
 
-    public Patterns getPattern(int id, SQLiteDatabase db) {
+    public Pattern getPattern(int id, SQLiteDatabase db) {
 
-        Cursor cursor = db.query(Patterns.TABLE_NAME,
-                new String[]{Patterns.COLUMN_ID, Patterns.COLUMN_NAME, Patterns.COLUMN_INTENSITIES},
-                Patterns.COLUMN_ID + "=?",
+        Cursor cursor = db.query(Pattern.TABLE_NAME,
+                new String[]{Pattern.COLUMN_ID, Pattern.COLUMN_NAME, Pattern.COLUMN_INTENSITIES},
+                Pattern.COLUMN_ID + "=?",
                 new String[]{String.valueOf(id)},
                 null, null, null, null);
 
@@ -55,51 +53,94 @@ public class PatternsHandler extends SQLiteOpenHelper {
         else
             return null;
 
-        Patterns note = new Patterns(
-                cursor.getInt(cursor.getColumnIndex(Patterns.COLUMN_ID)),
-                cursor.getString(cursor.getColumnIndex(Patterns.COLUMN_NAME)),
-                cursor.getString(cursor.getColumnIndex(Patterns.COLUMN_INTENSITIES)));
+        Pattern note = new Pattern(
+                cursor.getInt(cursor.getColumnIndex(Pattern.COLUMN_ID)),
+                cursor.getString(cursor.getColumnIndex(Pattern.COLUMN_NAME)),
+                cursor.getString(cursor.getColumnIndex(Pattern.COLUMN_INTENSITIES)));
 
         cursor.close();
 
         return note;
     }
 
-    public Patterns getRandomPatternByAngerLevel(int angerLevel, SQLiteDatabase db) {
+    public String getRandomOrderPatterns(SQLiteDatabase db) {
 
-        Cursor cursor = db.query(Patterns.TABLE_NAME,
-                new String[]{Patterns.COLUMN_ID, Patterns.COLUMN_NAME, Patterns.COLUMN_INTENSITIES},
-                Patterns.COLUMN_INTENSITIES + " LIKE ?",
-                new String[]{"%"+String.valueOf(1)+"%"},//DEBUG
-                null, null, "RANDOM()", "1");//RANDOM()
+        Cursor cursor = db.query(Pattern.TABLE_NAME,
+                new String[]{Pattern.COLUMN_ID, Pattern.COLUMN_NAME, Pattern.COLUMN_INTENSITIES},
+                null,
+                null,
+                null, null, "RANDOM()", null);
 
-        if (cursor != null)
-            cursor.moveToFirst();
-        else
+        if (cursor == null)
             return null;
 
-        Patterns note;
-
-        try{
-            note = new Patterns(
-                    cursor.getInt(cursor.getColumnIndex(Patterns.COLUMN_ID)),
-                    cursor.getString(cursor.getColumnIndex(Patterns.COLUMN_NAME)),
-                    cursor.getString(cursor.getColumnIndex(Patterns.COLUMN_INTENSITIES)));
-        } catch (CursorIndexOutOfBoundsException e){
+        if (cursor.getCount() == 0)
             return null;
+
+        cursor.moveToFirst();
+
+        String result = "";
+
+        int i = 0;
+
+        while (cursor.moveToNext()) {
+            result = result.concat(
+                    String.valueOf(cursor.getInt(cursor.getColumnIndex(Pattern.COLUMN_ID))));
+
+            result = result.concat(",");
         }
 
 
+        cursor.close();
+
+        if (result.contains(",")) {
+            result = result.substring(0, result.length() - 1);
+        }
+
+        return result;
+    }
+
+    public String getRandomOrderPatternsByAngerLevel(int angerLevel, SQLiteDatabase db) {
+
+        Cursor cursor = db.query(Pattern.TABLE_NAME,
+                new String[]{Pattern.COLUMN_ID, Pattern.COLUMN_NAME, Pattern.COLUMN_INTENSITIES},
+                Pattern.COLUMN_INTENSITIES + " LIKE ?",
+                new String[]{"%"+String.valueOf(1)+"%"},//DEBUG
+                null, null, "RANDOM()", null);
+
+        if (cursor == null)
+            return null;
+
+        if(cursor.getCount() == 0)
+            return null;
+
+        cursor.moveToFirst();
+
+        String result = "";
+
+        int i=0;
+
+        while(cursor.moveToNext()){
+            result = result.concat(
+                    String.valueOf(cursor.getInt(cursor.getColumnIndex(Pattern.COLUMN_ID))));
+
+            result = result.concat(",");
+        }
+
 
         cursor.close();
 
-        return note;
+        if(result.contains(",")){
+            result = result.substring(0, result.length() -1);
+        }
+
+        return result;
     }
 
     public boolean patternExists(int id, SQLiteDatabase db){
-        Cursor cursor = db.query(Patterns.TABLE_NAME,
-                new String[]{Patterns.COLUMN_ID, Patterns.COLUMN_NAME, Patterns.COLUMN_INTENSITIES},
-                Patterns.COLUMN_ID + "=?",
+        Cursor cursor = db.query(Pattern.TABLE_NAME,
+                new String[]{Pattern.COLUMN_ID, Pattern.COLUMN_NAME, Pattern.COLUMN_INTENSITIES},
+                Pattern.COLUMN_ID + "=?",
                 new String[]{String.valueOf(id)},
                 null, null, null, null);
 
@@ -110,25 +151,25 @@ public class PatternsHandler extends SQLiteOpenHelper {
     }
 
     //Update pattern by id
-    public void updatePattern(Patterns pattern, SQLiteDatabase db) {
+    public void updatePattern(Pattern pattern, SQLiteDatabase db) {
 
         ContentValues values = new ContentValues();
 
         if(pattern.getName().length() > 0) {
-            values.put(Patterns.COLUMN_NAME, pattern.getName());
+            values.put(Pattern.COLUMN_NAME, pattern.getName());
         }
 
         if(pattern.getIntensities().length() > 0) {
-            values.put(Patterns.COLUMN_INTENSITIES, pattern.getIntensities());
+            values.put(Pattern.COLUMN_INTENSITIES, pattern.getIntensities());
         }
 
-        db.update(Patterns.TABLE_NAME, values, Patterns.COLUMN_ID + " = ?",
+        db.update(Pattern.TABLE_NAME, values, Pattern.COLUMN_ID + " = ?",
                 new String[]{String.valueOf(pattern.getId())});
     }
 
     public void deletePattern(int id, SQLiteDatabase db){
 
-        db.delete(Patterns.TABLE_NAME, Patterns.COLUMN_ID + "=?",
+        db.delete(Pattern.TABLE_NAME, Pattern.COLUMN_ID + "=?",
                 new String[]{String.valueOf(id)});
 
         db.close();

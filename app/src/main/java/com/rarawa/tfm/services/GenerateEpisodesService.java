@@ -8,6 +8,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.rarawa.tfm.sqlite.SqliteHandler;
+import com.rarawa.tfm.sqlite.models.AngerLevel;
 import com.rarawa.tfm.utils.Constants;
 
 import static com.rarawa.tfm.utils.Constants.LOG_TAG;
@@ -57,6 +58,7 @@ public class GenerateEpisodesService extends Service  {
 
     private void generateValue(SqliteHandler db, int currentAngerLevel){
         long currentTimestamp = System.currentTimeMillis();
+
         db.insertAngerLevel(currentTimestamp, currentAngerLevel);
 
         String message = String.format("%d,%d", currentAngerLevel, currentTimestamp);

@@ -66,7 +66,7 @@ public class ApiRest {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e(Constants.LOG_TAG, error.getMessage());
+                //Log.e(Constants.LOG_TAG, error.getMessage());
             }
         }) {
             @Override

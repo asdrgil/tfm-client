@@ -7,13 +7,15 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.rarawa.tfm.sqlite.controllers.AngerLevelHandler;
 import com.rarawa.tfm.sqlite.controllers.CalibrateSleepHandler;
 import com.rarawa.tfm.sqlite.controllers.CalibrateExerciseHandler;
+import com.rarawa.tfm.sqlite.controllers.DisplayedPatternHandler;
 import com.rarawa.tfm.sqlite.controllers.PatternsHandler;
 import com.rarawa.tfm.sqlite.controllers.ReasonAngerHandler;
 import com.rarawa.tfm.sqlite.controllers.UserInfoHandler;
 import com.rarawa.tfm.sqlite.models.AngerLevel;
 import com.rarawa.tfm.sqlite.models.CalibrateSleep;
 import com.rarawa.tfm.sqlite.models.CalibrateExercise;
-import com.rarawa.tfm.sqlite.models.Patterns;
+import com.rarawa.tfm.sqlite.models.DisplayedPattern;
+import com.rarawa.tfm.sqlite.models.Pattern;
 import com.rarawa.tfm.sqlite.models.ReasonAnger;
 import com.rarawa.tfm.sqlite.models.UserInfo;
 import com.rarawa.tfm.utils.Constants;
@@ -26,6 +28,7 @@ public class SqliteHandler extends SQLiteOpenHelper {
     PatternsHandler patternsHandler;
     AngerLevelHandler angerLevelHandler;
     ReasonAngerHandler reasonAngerHandler;
+    DisplayedPatternHandler displayedPatternHandler;
 
     public SqliteHandler(Context context) {
         super(context, Constants.SQLITE_DB_NAME, null, Constants.SQLITE_VERSION);
@@ -35,15 +38,17 @@ public class SqliteHandler extends SQLiteOpenHelper {
         patternsHandler = new PatternsHandler(context);
         angerLevelHandler = new AngerLevelHandler(context);
         reasonAngerHandler = new ReasonAngerHandler(context);
+        displayedPatternHandler = new DisplayedPatternHandler(context);
     }
 
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(UserInfo.CREATE_TABLE);
         db.execSQL(CalibrateSleep.CREATE_TABLE);
         db.execSQL(CalibrateExercise.CREATE_TABLE);
-        db.execSQL(Patterns.CREATE_TABLE);
+        db.execSQL(Pattern.CREATE_TABLE);
         db.execSQL(AngerLevel.CREATE_TABLE);
         db.execSQL(ReasonAnger.CREATE_TABLE);
+        db.execSQL(DisplayedPattern.CREATE_TABLE);
     }
 
     @Override
@@ -51,9 +56,10 @@ public class SqliteHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + UserInfo.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + CalibrateSleep.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + CalibrateExercise.TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + Patterns.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Pattern.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + AngerLevel.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + ReasonAnger.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + DisplayedPattern.TABLE_NAME);
         onCreate(db);
     }
 
@@ -145,7 +151,7 @@ public class SqliteHandler extends SQLiteOpenHelper {
         return patternsHandler.insertPattern(id, name, intensities, this.getWritableDatabase());
     }
 
-    public Patterns getPattern(int id) {
+    public Pattern getPattern(int id) {
         return patternsHandler.getPattern(id, this.getReadableDatabase());
     }
 
@@ -153,7 +159,7 @@ public class SqliteHandler extends SQLiteOpenHelper {
         return patternsHandler.patternExists(id, this.getReadableDatabase());
     }
 
-    public void updatePattern(Patterns pattern) {
+    public void updatePattern(Pattern pattern) {
         patternsHandler.updatePattern(pattern, this.getWritableDatabase());
     }
 
@@ -167,14 +173,12 @@ public class SqliteHandler extends SQLiteOpenHelper {
         return angerLevelHandler.insertAngerLevel(timestamp, angerLevel, this.getWritableDatabase());
     }
 
-    public long insertAngerLevel(long timestamp, int angerLevel, int suggestedPattern,
-                                 int usefulnessPattern, String commentPattern){
-        return angerLevelHandler.insertAngerLevel(timestamp, angerLevel, suggestedPattern,
-                usefulnessPattern, commentPattern, this.getWritableDatabase());
+    public String getRandomOrderPatterns(){
+        return patternsHandler.getRandomOrderPatterns(this.getReadableDatabase());
     }
 
-    public Patterns getRandomPatternByAngerLevel(int angerLevel){
-        return patternsHandler.getRandomPatternByAngerLevel(angerLevel, this.getReadableDatabase());
+    public String getRandomOrderPatternsByAngerLevel(int angerLevel){
+        return patternsHandler.getRandomOrderPatternsByAngerLevel(angerLevel, this.getReadableDatabase());
     }
 
     public AngerLevel getAngerLevelById(int id){
@@ -193,10 +197,6 @@ public class SqliteHandler extends SQLiteOpenHelper {
         return angerLevelHandler.getPenultimateAngerLevel(this.getReadableDatabase());
     }
 
-    public void updateAngerLevel(AngerLevel angerLevel){
-        angerLevelHandler.updateAngerLevel(angerLevel, this.getWritableDatabase());
-    }
-
     /* REASONANGER METHODS */
 
     public void insertReasonAnger(int idFirstAngerLevel, int reasonAnger){
@@ -206,6 +206,17 @@ public class SqliteHandler extends SQLiteOpenHelper {
 
     public ReasonAnger getReasonAnger(int idFirstAngerLevel){
         return reasonAngerHandler.getReasonAnger(idFirstAngerLevel, this.getReadableDatabase());
+    }
+
+    /* DISPLAYPATTERN METHODS */
+
+    public void insertDisplayedPattern(int angerLevelId, int patternId){
+        displayedPatternHandler.insertDisplayedPattern(
+                angerLevelId, patternId, this.getWritableDatabase());
+    }
+
+    public void updateDisplayedPattern(DisplayedPattern displayedPattern){
+        displayedPatternHandler.updateDisplayedPattern(displayedPattern, this.getWritableDatabase());
     }
 
 }

@@ -16,7 +16,10 @@ import com.rarawa.tfm.MainActivity;
 import com.rarawa.tfm.R;
 import com.rarawa.tfm.sqlite.SqliteHandler;
 import com.rarawa.tfm.sqlite.models.AngerLevel;
+import com.rarawa.tfm.sqlite.models.DisplayedPattern;
+import com.rarawa.tfm.sqlite.models.Pattern;
 import com.rarawa.tfm.utils.Constants;
+import com.rarawa.tfm.utils.DisplayPatternUtils;
 
 
 public class MainFragment_3 extends Fragment implements View.OnClickListener {
@@ -42,61 +45,72 @@ public class MainFragment_3 extends Fragment implements View.OnClickListener {
     }
 
     public void displayOldPattern(View rootView){
-        SqliteHandler db = new SqliteHandler(getContext());
 
         TextView patternTextView = rootView.findViewById(R.id.textPatternValueOld);
-
-        SharedPreferences sharedPref = getContext().getSharedPreferences(
-                Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
-
-        String oldPatternUnparsed =
-                sharedPref.getString(Constants.SHAREDPREFERENCES_CURRENT_PATTERN, "");
-
-        String [] oldPatternElements =  oldPatternUnparsed.split(",");
-        String  oldPatternText = oldPatternElements[1];
-
-        patternTextView.setText(oldPatternText);
+        Pattern currentPattern = DisplayPatternUtils.getCurrentPattern(getContext());
+        patternTextView.setText(currentPattern.getName());
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
 
+            //Update radio button info on DB
             case R.id.btnUsefulnessPattern:
                 Log.d(Constants.LOG_TAG, "onClick btnUsefulnessPattern");
                 SqliteHandler db = new SqliteHandler(getContext());
                 AngerLevel lastAngerLevel = db.getLastAngerLevel();
 
-                if(lastAngerLevel.getAngerLevel() > 0) {
-                    ((MainActivity) getActivity())
-                            .setSubFragment(Constants.SUBFRAGMENT_MAIN.get(2));
-                } else {
-                    ((MainActivity) getActivity())
-                            .setSubFragment(Constants.SUBFRAGMENT_MAIN.get(0));
-                }
-
-                //Update radio button info on DB
-
                 SharedPreferences sharedPref = getContext().getSharedPreferences(
                         Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
+
+                Pattern currentPattern = DisplayPatternUtils.getCurrentPattern(getContext());
 
                 int displayAngerLevelId =
                         sharedPref.getInt(Constants.SHAREDPREFERENCES_DISPLAY_ANGERLEVEL_ID, 0);
 
-                if(displayAngerLevelId == 0 ||
-                        (!usefulnessPatternYes.isChecked() && usefulnessPatternNo.isChecked())){
-                    break;
+                if(!(displayAngerLevelId == 0 ||
+                        (!usefulnessPatternYes.isChecked() && !usefulnessPatternNo.isChecked()))) {
+
+                    DisplayedPattern displayedPattern = new DisplayedPattern();
+                    displayedPattern.setId(currentPattern.getId());
+                    displayedPattern.setAngerLevelId(displayAngerLevelId);
+
+                    if (usefulnessPatternYes.isChecked()) {
+                        displayedPattern.setStatus(1);
+                    } else if(usefulnessPatternNo.isChecked()) {
+                        displayedPattern.setStatus(-2);
+                    }
+
+                    db.updateDisplayedPattern(displayedPattern);
+
+                    //Load new pattern
+                    if (lastAngerLevel.getAngerLevel() > 0) {
+
+                        //If the next anger level is the same as the current displayed one,
+                        // just rotate the patterns to be shown
+                        if(lastAngerLevel.getAngerLevel() ==
+                                DisplayPatternUtils.getDisplayAngerLevel(getContext())){
+                            DisplayPatternUtils.rotatePatterns(getContext());
+                            DisplayPatternUtils.setDisplayAngerLevel(getContext());
+
+                        //Else, generate new patterns
+                        } else {
+                            DisplayPatternUtils.setDisplayAngerLevel(getContext());
+                            DisplayPatternUtils.generateNewPattern(getContext());
+                        }
+
+                        ((MainActivity) getActivity())
+                                .setSubFragment(Constants.SUBFRAGMENT_MAIN.get(2));
+
+                    } else {
+
+                        DisplayPatternUtils.setDisplayAngerLevel(getContext());
+
+                        ((MainActivity) getActivity())
+                                .setSubFragment(Constants.SUBFRAGMENT_MAIN.get(0));
+                    }
                 }
-
-                AngerLevel displayAngerLevel = db.getAngerLevelById(displayAngerLevelId);
-
-                if(usefulnessPatternYes.isChecked()){
-                    displayAngerLevel.setUsefulnessPattern(1);
-                } else {
-                    displayAngerLevel.setUsefulnessPattern(0);
-                }
-
-                db.updateAngerLevel(displayAngerLevel);
 
                 break;
         }

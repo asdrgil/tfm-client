@@ -1,10 +1,5 @@
 package com.rarawa.tfm.fragments;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -14,17 +9,14 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.rarawa.tfm.MainActivity;
 import com.rarawa.tfm.R;
 import com.rarawa.tfm.sqlite.SqliteHandler;
 import com.rarawa.tfm.sqlite.models.AngerLevel;
 import com.rarawa.tfm.utils.Constants;
-
-import java.util.Map;
+import com.rarawa.tfm.utils.DisplayPatternUtils;
 
 import static com.rarawa.tfm.utils.Constants.REASON_ANGER;
 
@@ -40,7 +32,9 @@ public class MainFragment_1 extends Fragment implements View.OnClickListener {
 
         angerReasonSpinner(rootView);
         Button btnReasonAnger = rootView.findViewById(R.id.btnReasonAnger);
-        btnReasonAnger.setOnClickListener( this);
+        btnReasonAnger.setOnClickListener(this);
+
+        DisplayPatternUtils.setDisplayAngerLevel(getContext());
 
         return rootView;
     }
@@ -86,12 +80,13 @@ public class MainFragment_1 extends Fragment implements View.OnClickListener {
 
             case R.id.btnReasonAnger:
                 Log.d(Constants.LOG_TAG, "onClick btnReasonAnger");
-                ((MainActivity) getActivity()).setSubFragment(Constants.SUBFRAGMENT_MAIN.get(2));
 
                 SqliteHandler db = new SqliteHandler(getContext());
                 AngerLevel lastAngerLevel = db.getLastAngerLevel();
 
                 db.insertReasonAnger(lastAngerLevel.getId(), spinnerPosition);
+
+                ((MainActivity) getActivity()).setSubFragment(Constants.SUBFRAGMENT_MAIN.get(2));
 
                 break;
         }

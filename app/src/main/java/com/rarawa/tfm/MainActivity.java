@@ -52,15 +52,12 @@ import com.rarawa.tfm.fragments.MainNotCalibratedFragment;
 import com.rarawa.tfm.fragments.RegisterFragment;
 import com.rarawa.tfm.services.GenerateEpisodesService;
 import com.rarawa.tfm.sqlite.SqliteHandler;
-import com.rarawa.tfm.sqlite.models.Patterns;
 import com.rarawa.tfm.sqlite.models.UserInfo;
 import com.rarawa.tfm.utils.ApiRest;
 import com.rarawa.tfm.utils.Constants;
 
 import java.util.Map;
 import java.util.UUID;
-
-import static java.lang.reflect.Array.getInt;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -125,6 +122,8 @@ public class MainActivity extends AppCompatActivity {
             //Get updated patterns for the patient periodically
             Handler handler = new Handler();
 
+            //Review periodically if there are new pattern changes on the web that
+            //need to be updated on the Android device
             Runnable runnableCode = new Runnable() {
                 @Override
                 public void run() {
@@ -151,8 +150,6 @@ public class MainActivity extends AppCompatActivity {
                             Snackbar.LENGTH_LONG);
                 }
 
-                //getResources().getText(R.string.calibrate_exercise_info3).toString()
-
                 receiver = new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
@@ -162,57 +159,57 @@ public class MainActivity extends AppCompatActivity {
                         String messsageArr[] = message.split(",");
                         int currentAngerLevel = Integer.parseInt(messsageArr[0]);
 
-                        //TODO:get and store the new recommended pattern
-
                         updateMainSubFragment(context, currentAngerLevel);
                         updateThermometer(findViewById(R.id.thermoIcon),
                                 findViewById(R.id.textLevel), currentAngerLevel);
 
-                        updatePattern(context, currentAngerLevel);
+                        //updatePattern(context, currentAngerLevel);
                     }
                 };
             }
         }
     }
 
-    private void updatePattern(Context context, int currentAngerLevel){
+    /*private void updatePattern(Context context, int currentAngerLevel){
         SharedPreferences sharedPref = context.getSharedPreferences(
                 Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
         SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
 
-        String currentPatternUnparsed =
-                sharedPref.getString(Constants.SHAREDPREFERENCES_CURRENT_PATTERN, "");
-
-        String newPattenUnparsed = "";
-
-        if(currentAngerLevel > 0){
-            boolean isNull = db.getRandomPatternByAngerLevel(currentAngerLevel) == null;
-
-            Log.d(Constants.LOG_TAG, "randomPattern: " + String.valueOf(isNull));
-
-            Patterns newPattern = db.getRandomPatternByAngerLevel(currentAngerLevel);
-
-            if(newPattern != null){
-                newPattenUnparsed = String.format("%d,%s",newPattern.getId(), newPattern.getName());
-            } else {
-                //TODO: improve message?
-                newPattenUnparsed = String.format("%d,%s", 0,
-                        "No hay pautas definidas para este nivel de ira. Consulta con tu terapeuta.");
-            }
-        } else {
-            newPattenUnparsed = "";
+        if(currentAngerLevel == 0){
+            sharedPrefEditor.putString(Constants.SHAREDPREFERENCES_CURRENT_PATTERNS_ORDER, "");
+            sharedPrefEditor.apply();
+            return;
         }
 
-        //If there is already an active pattern, queue the new one
-        if(currentPatternUnparsed.length() > 0){
-            sharedPrefEditor.putString(Constants.SHAREDPREFERENCES_NEXT_PATTERN, newPattenUnparsed);
-        //Else, the new pattern is the active pattern
-        } else {
-            sharedPrefEditor.putString(Constants.SHAREDPREFERENCES_CURRENT_PATTERN, newPattenUnparsed);
+        String currentPatternsUnparsed =
+                sharedPref.getString(
+                        Constants.SHAREDPREFERENCES_CURRENT_PATTERNS_ORDER, "");
+
+        //Angerlevel has not changed since the previous measurement and there are at least
+        //two patterns to rotate the patterns to be displayed
+        if(currentAngerLevel == db.getPenultimateAngerLevel().getAngerLevel()
+                && currentPatternsUnparsed.contains(",")){
+            String [] currentPatterns = currentPatternsUnparsed.split(",", 2);
+            currentPatternsUnparsed = currentPatterns[1].concat(",").concat(currentPatterns[1]);
+
+            sharedPrefEditor.putString(Constants.SHAREDPREFERENCES_CURRENT_PATTERNS_ORDER,
+                    currentPatternsUnparsed);
+
+
+        //Angerlevel has changed since the previous measurement
+        } else if(currentAngerLevel != db.getPenultimateAngerLevel().getAngerLevel()){
+            currentPatternsUnparsed =
+                    db.getRandomOrderPatternsByAngerLevel(currentAngerLevel);
+
+            sharedPrefEditor.putString(Constants.SHAREDPREFERENCES_CURRENT_PATTERNS_ORDER,
+                    currentPatternsUnparsed);
         }
 
-        sharedPrefEditor.apply();
-    }
+        sharedPrefEditor.commit();
+
+        //TODO: ver si peta en caso de que no haya ninguna pauta para el nivel dado.
+        // Controlar este error
+    }*/
 
     private void updateMainSubFragment(Context context, int currentAngerLevel){
         SharedPreferences sharedPref = context.getSharedPreferences(
@@ -254,8 +251,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d(Constants.LOG_TAG, "isOneMinuteRest clause");
 
             SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
-            sharedPrefEditor.putString(Constants.SHAREDPREFERENCES_CURRENT_PATTERN, "");
-            sharedPrefEditor.putString(Constants.SHAREDPREFERENCES_NEXT_PATTERN, "");
+            sharedPrefEditor.putString(Constants.SHAREDPREFERENCES_CURRENT_PATTERNS_ORDER, "");
             sharedPrefEditor.apply();
 
             setSubFragment(Constants.SUBFRAGMENT_MAIN.get(0));

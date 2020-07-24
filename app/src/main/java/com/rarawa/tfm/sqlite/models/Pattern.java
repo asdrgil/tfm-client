@@ -1,6 +1,6 @@
 package com.rarawa.tfm.sqlite.models;
 
-public class Patterns {
+public class Pattern {
 
     public static final String TABLE_NAME = "patterns";
 
@@ -19,9 +19,9 @@ public class Patterns {
                     COLUMN_NAME, "TEXT NOT NULL",
                     COLUMN_INTENSITIES, "TEXT NOT NULL");
 
-    public Patterns(){}
+    public Pattern(){}
 
-    public Patterns(int id, String name, String intensity){
+    public Pattern(int id, String name, String intensity){
         this.id = id;
         this.name = name;
         this.intensities = intensities;

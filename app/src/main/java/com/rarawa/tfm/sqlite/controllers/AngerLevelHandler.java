@@ -3,14 +3,11 @@ package com.rarawa.tfm.sqlite.controllers;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import com.rarawa.tfm.sqlite.models.AngerLevel;
-import com.rarawa.tfm.sqlite.models.Patterns;
 import com.rarawa.tfm.utils.Constants;
 
 public class AngerLevelHandler extends SQLiteOpenHelper {
@@ -29,19 +26,11 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
     }
 
     public long insertAngerLevel(long timestamp, int angerLevel, SQLiteDatabase db){
-        return insertAngerLevel(timestamp, angerLevel, 0, 0, "", db);
-    }
-
-    public long insertAngerLevel(long timestamp, int angerLevel, int suggestedPattern,
-            int usefulnessPattern, String commentPattern, SQLiteDatabase db){
 
         ContentValues values = new ContentValues();
 
         values.put(AngerLevel.COLUMN_TIMESTAMP, timestamp);
         values.put(AngerLevel.COLUMN_ANGER_LEVEL, angerLevel);
-        values.put(AngerLevel.COLUMN_SUGGESTED_PATTERN, suggestedPattern);
-        values.put(AngerLevel.COLUMN_USEFULNESS_PATTERN, usefulnessPattern);
-        values.put(AngerLevel.COLUMN_COMMENT_PATTERN, commentPattern);
 
         //Insert new register
         long result = db.insert(AngerLevel.TABLE_NAME, null, values);
@@ -55,8 +44,7 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
     public AngerLevel getAngerLevelById(int id, SQLiteDatabase db){
         Cursor cursor = db.query(AngerLevel.TABLE_NAME,
                 new String[]{AngerLevel.COLUMN_ID, AngerLevel.COLUMN_TIMESTAMP,
-                        AngerLevel.COLUMN_ANGER_LEVEL, AngerLevel.COLUMN_SUGGESTED_PATTERN,
-                        AngerLevel.COLUMN_USEFULNESS_PATTERN, AngerLevel.COLUMN_COMMENT_PATTERN},
+                        AngerLevel.COLUMN_ANGER_LEVEL},
                 AngerLevel.COLUMN_ID + "=?",
                 new String[]{String.valueOf(id)},
                 null, null, null, null);
@@ -69,10 +57,7 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
         AngerLevel note = new AngerLevel(
                 cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ID)),
                 cursor.getLong(cursor.getColumnIndex(AngerLevel.COLUMN_TIMESTAMP)),
-                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ANGER_LEVEL)),
-                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_SUGGESTED_PATTERN)),
-                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_USEFULNESS_PATTERN)),
-                cursor.getString(cursor.getColumnIndex(AngerLevel.COLUMN_SUGGESTED_PATTERN)));
+                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ANGER_LEVEL)));
 
         cursor.close();
 
@@ -82,8 +67,7 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
     public AngerLevel getAngerLevelByTimestamp(long timestamp, SQLiteDatabase db){
         Cursor cursor = db.query(AngerLevel.TABLE_NAME,
                 new String[]{AngerLevel.COLUMN_ID, AngerLevel.COLUMN_TIMESTAMP,
-                        AngerLevel.COLUMN_ANGER_LEVEL, AngerLevel.COLUMN_SUGGESTED_PATTERN,
-                        AngerLevel.COLUMN_USEFULNESS_PATTERN, AngerLevel.COLUMN_COMMENT_PATTERN},
+                        AngerLevel.COLUMN_ANGER_LEVEL},
                 AngerLevel.COLUMN_TIMESTAMP + "=?",
                 new String[]{String.valueOf(timestamp)},
                 null, null, null, null);
@@ -96,10 +80,7 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
         AngerLevel note = new AngerLevel(
                 cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ID)),
                 cursor.getLong(cursor.getColumnIndex(AngerLevel.COLUMN_TIMESTAMP)),
-                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ANGER_LEVEL)),
-                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_SUGGESTED_PATTERN)),
-                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_USEFULNESS_PATTERN)),
-                cursor.getString(cursor.getColumnIndex(AngerLevel.COLUMN_SUGGESTED_PATTERN)));
+                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ANGER_LEVEL)));
 
         cursor.close();
 
@@ -109,8 +90,7 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
     public AngerLevel getLastAngerLevel(SQLiteDatabase db){
         Cursor cursor = db.query(AngerLevel.TABLE_NAME,
                 new String[]{AngerLevel.COLUMN_ID, AngerLevel.COLUMN_TIMESTAMP,
-                        AngerLevel.COLUMN_ANGER_LEVEL, AngerLevel.COLUMN_SUGGESTED_PATTERN,
-                        AngerLevel.COLUMN_USEFULNESS_PATTERN, AngerLevel.COLUMN_COMMENT_PATTERN},
+                        AngerLevel.COLUMN_ANGER_LEVEL},
                 null, null, null, null,
                 AngerLevel.COLUMN_TIMESTAMP + " DESC");
 
@@ -122,16 +102,10 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
             return null;
         }
 
-        //long tmp = cursor.getLong(cursor.getColumnIndex(AngerLevel.COLUMN_TIMESTAMP));
-
         AngerLevel note = new AngerLevel(
                 cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ID)),
                 cursor.getLong(cursor.getColumnIndex(AngerLevel.COLUMN_TIMESTAMP)),
-                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ANGER_LEVEL)),
-                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_SUGGESTED_PATTERN)),
-                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_USEFULNESS_PATTERN)),
-                cursor.getString(cursor.getColumnIndex(AngerLevel.COLUMN_COMMENT_PATTERN)));
-                //"");
+                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ANGER_LEVEL)));
 
         cursor.close();
 
@@ -141,8 +115,7 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
     public AngerLevel getPenultimateAngerLevel(SQLiteDatabase db){
         Cursor cursor = db.query(AngerLevel.TABLE_NAME,
                 new String[]{AngerLevel.COLUMN_ID, AngerLevel.COLUMN_TIMESTAMP,
-                        AngerLevel.COLUMN_ANGER_LEVEL, AngerLevel.COLUMN_SUGGESTED_PATTERN,
-                        AngerLevel.COLUMN_USEFULNESS_PATTERN, AngerLevel.COLUMN_COMMENT_PATTERN},
+                        AngerLevel.COLUMN_ANGER_LEVEL},
                 null, null, null, null,
                 AngerLevel.COLUMN_TIMESTAMP + " DESC LIMIT 1,1");
 
@@ -154,38 +127,11 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
         AngerLevel note = new AngerLevel(
                 cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ID)),
                 cursor.getLong(cursor.getColumnIndex(AngerLevel.COLUMN_TIMESTAMP)),
-                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ANGER_LEVEL)),
-                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_SUGGESTED_PATTERN)),
-                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_USEFULNESS_PATTERN)),
-                cursor.getString(cursor.getColumnIndex(AngerLevel.COLUMN_SUGGESTED_PATTERN)));
+                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ANGER_LEVEL)));
 
         cursor.close();
 
         return note;
     }
 
-    //Update angerLevel information
-    public void updateAngerLevel(AngerLevel angerLevel, SQLiteDatabase db) {
-
-        ContentValues values = new ContentValues();
-
-        if(angerLevel.getAngerLevel() >= 0 && angerLevel.getAngerLevel() <= 4){
-            values.put(AngerLevel.COLUMN_ANGER_LEVEL, angerLevel.getAngerLevel());
-        }
-
-        if(angerLevel.getSuggestedPattern() > 0){
-            values.put(AngerLevel.COLUMN_SUGGESTED_PATTERN, angerLevel.getSuggestedPattern());
-        }
-
-        if(angerLevel.getUsefulnessPattern() != 0){
-            values.put(AngerLevel.COLUMN_USEFULNESS_PATTERN, angerLevel.getUsefulnessPattern());
-        }
-
-        if(angerLevel.getCommentPattern().length() > 0){
-            values.put(AngerLevel.COLUMN_COMMENT_PATTERN, angerLevel.getCommentPattern());
-        }
-
-        db.update(AngerLevel.TABLE_NAME, values, AngerLevel.COLUMN_TIMESTAMP + " = ?",
-                new String[]{String.valueOf(angerLevel.getTimestamp())});
-    }
 }
