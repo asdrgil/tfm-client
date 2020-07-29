@@ -3,6 +3,10 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
 
+    packagingOptions {
+        exclude 'META-INF/proguard/androidx-annotations.pro'
+    }
+
     defaultConfig {
         applicationId "com.rarawa.tfm"
         minSdkVersion 21
@@ -36,4 +40,6 @@ dependencies {
     implementation group: 'com.codesnippets4all', name: 'quick-json', version: '1.0.4'
     debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'
     implementation group: 'org.mongodb', name: 'bson', version: '3.0.0'
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+
 }

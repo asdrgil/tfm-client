@@ -97,6 +97,40 @@ public class CalibrateExerciseHandler extends SQLiteOpenHelper {
         }
     }
 
+    public static int insertEndExerciseDebug(SQLiteDatabase db) {
+
+        if(calibrateExerciseExists(db) == 0){
+            Log.e(Constants.LOG_TAG, "Exercise exists: -1");
+            return -1;
+        } else {
+
+            CalibrateExercise exercise = getExercise(db);
+
+            if(exercise.getStartTimestamp() == 0){
+                Log.e(Constants.LOG_TAG, "Exercise exists; startTmp: -1");
+                return -1;
+            }
+
+            //Everything went ok, write the end time
+
+            //Get writable database
+            ContentValues values = new ContentValues();
+
+            values.put(CalibrateExercise.COLUMN_END_TIMESTAMP, exercise.getStartTimestamp()
+                    + MINIMUM_EXERCISE_CALIBRATE_TIME + 1);
+
+            db.update(CalibrateExercise.TABLE_NAME, values, CalibrateExercise.COLUMN_ID + " = ?",
+                    new String[]{String.valueOf(exercise.getId())});
+
+            db.close();
+
+            Log.e(Constants.LOG_TAG, "Exercise exists: 1");
+
+            return 1;
+
+        }
+    }
+
     public static void undoStartExercise(SQLiteDatabase db) {
         ContentValues values = new ContentValues();
 

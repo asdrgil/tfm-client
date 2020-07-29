@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.rarawa.tfm.sqlite.models.DisplayedPattern;
 import com.rarawa.tfm.sqlite.models.ReasonAnger;
 import com.rarawa.tfm.utils.Constants;
 
@@ -37,6 +38,34 @@ public class ReasonAngerHandler extends SQLiteOpenHelper {
         db.close();
 
         return result;
+    }
+
+    public long insertReasonAngerFull(int idFirstAngerLevel, int idLastAngerLevel, int reasonAnger, SQLiteDatabase db){
+
+        ContentValues values = new ContentValues();
+
+        values.put(ReasonAnger.COLUMN_ID_FIRST_ANGER_LEVEL, idFirstAngerLevel);
+        values.put(ReasonAnger.COLUMN_ID_LAST_ANGER_LEVEL, idLastAngerLevel);
+        values.put(ReasonAnger.COLUMN_REASON_ANGER, reasonAnger);
+        //Insert new register
+        long result = db.insert(ReasonAnger.TABLE_NAME, null, values);
+
+        db.close();
+
+        return result;
+    }
+
+    public void updateReasonAnger(int idFirstAngerLevel, int idLastAngerLevel, SQLiteDatabase db){
+        ContentValues values = new ContentValues();
+
+        values.put(ReasonAnger.COLUMN_ID_LAST_ANGER_LEVEL, idLastAngerLevel);
+
+        db.update(ReasonAnger.TABLE_NAME, values, ReasonAnger.COLUMN_ID_FIRST_ANGER_LEVEL + " = ?",
+                new String[]{String.valueOf(idFirstAngerLevel)});
+
+        db.close();
+
+
     }
 
     public ReasonAnger getReasonAnger(int idFirstAngerLevel, SQLiteDatabase db){

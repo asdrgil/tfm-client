@@ -22,7 +22,7 @@ public class Constants {
             UUID.fromString("00002902-0000-1000-8000-00805F9B34FB");
 
     //Measurement every X milliseconds
-    public static final int MEASUREMENT_FREQUENCY = 8*1000; //DEBUG
+    public static final int MEASUREMENT_FREQUENCY = 10*1000; //DEBUG
     //Maximum time a anger level is valid (it should be MEASUREMENT_FREQUENCY, but the app can fail
     //and not measure some state. At this point, is when this value is useful
     public static final int MEASUREMENT_VALID_TIME = 20*1000;
@@ -52,6 +52,7 @@ public class Constants {
     /* Fragments */
     public static final String FRAGMENT_MAIN = "main";
     public static final String FRAGMENT_INDEX_NOT_CALIBRATED = "index_not_calibrated";
+    public static final String FRAGMENT_HISTORY = "history";
     public static final String FRAGMENT_REGISTER = "register";
     public static final String FRAGMENT_CALIBRATE = "calibrate";
     public static final String FRAGMENT_CALIBRATE_SLEEP = "calibrateSleep";
@@ -114,4 +115,6 @@ public class Constants {
 
     //Inactive time before making the old episode obsolete
     public static final int TIME_EPISODE_IS_OBSOLETE = 60*1000;
+
+    public static final float ONE_DAY_TIMESTAMP = 60*60*24;
 }

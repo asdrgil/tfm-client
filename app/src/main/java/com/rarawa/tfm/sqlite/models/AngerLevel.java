@@ -6,12 +6,12 @@ public class AngerLevel {
 
     public static final String COLUMN_ID = "id";
     public static final String COLUMN_TIMESTAMP = "timestamp";
-    public static final String COLUMN_ANGER_LEVEL = "angerLevel";
+    public static final String COLUMN_ANGER_VAL = "val";
 
 
     private int id = 0;
     private long timestamp = 0;
-    private int angerLevel = 0;
+    private int val = 0;
 
 
 
@@ -20,14 +20,14 @@ public class AngerLevel {
                     TABLE_NAME,
                     COLUMN_ID, "INTEGER PRIMARY KEY AUTOINCREMENT",
                     COLUMN_TIMESTAMP, "INTEGER NOT NULL",
-                    COLUMN_ANGER_LEVEL, "INTEGER NOT NULL");
+                    COLUMN_ANGER_VAL, "INTEGER NOT NULL");
 
     public AngerLevel(){}
 
-    public AngerLevel(int id, long timestamp, int angerLevel){
+    public AngerLevel(int id, long timestamp, int val){
         this.id = id;
         this.timestamp = timestamp;
-        this.angerLevel = angerLevel;
+        this.val = val;
     }
 
     public int getId() {
@@ -47,11 +47,11 @@ public class AngerLevel {
     }
 
     public int getAngerLevel() {
-        return angerLevel;
+        return val;
     }
 
     public void setAngerLevel(int angerLevel) {
-        this.angerLevel = angerLevel;
+        this.val = val;
     }
 
 }

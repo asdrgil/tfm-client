@@ -1,12 +1,12 @@
 package com.rarawa.tfm;
 
 import android.os.Build;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toolbar;
 
 //TODO
 public class SettingsActivity extends AppCompatActivity {
@@ -28,6 +28,9 @@ public class SettingsActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= 21) {
             getWindow().setStatusBarColor(colorPrimaryDark);
         }
+    }
+
+    private void setSupportActionBar(Toolbar toolbar) {
     }
 
     @Override

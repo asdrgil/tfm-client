@@ -30,7 +30,7 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
 
         values.put(AngerLevel.COLUMN_TIMESTAMP, timestamp);
-        values.put(AngerLevel.COLUMN_ANGER_LEVEL, angerLevel);
+        values.put(AngerLevel.COLUMN_ANGER_VAL, angerLevel);
 
         //Insert new register
         long result = db.insert(AngerLevel.TABLE_NAME, null, values);
@@ -44,7 +44,7 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
     public AngerLevel getAngerLevelById(int id, SQLiteDatabase db){
         Cursor cursor = db.query(AngerLevel.TABLE_NAME,
                 new String[]{AngerLevel.COLUMN_ID, AngerLevel.COLUMN_TIMESTAMP,
-                        AngerLevel.COLUMN_ANGER_LEVEL},
+                        AngerLevel.COLUMN_ANGER_VAL},
                 AngerLevel.COLUMN_ID + "=?",
                 new String[]{String.valueOf(id)},
                 null, null, null, null);
@@ -57,7 +57,7 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
         AngerLevel note = new AngerLevel(
                 cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ID)),
                 cursor.getLong(cursor.getColumnIndex(AngerLevel.COLUMN_TIMESTAMP)),
-                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ANGER_LEVEL)));
+                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ANGER_VAL)));
 
         cursor.close();
 
@@ -67,7 +67,7 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
     public AngerLevel getAngerLevelByTimestamp(long timestamp, SQLiteDatabase db){
         Cursor cursor = db.query(AngerLevel.TABLE_NAME,
                 new String[]{AngerLevel.COLUMN_ID, AngerLevel.COLUMN_TIMESTAMP,
-                        AngerLevel.COLUMN_ANGER_LEVEL},
+                        AngerLevel.COLUMN_ANGER_VAL},
                 AngerLevel.COLUMN_TIMESTAMP + "=?",
                 new String[]{String.valueOf(timestamp)},
                 null, null, null, null);
@@ -80,7 +80,7 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
         AngerLevel note = new AngerLevel(
                 cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ID)),
                 cursor.getLong(cursor.getColumnIndex(AngerLevel.COLUMN_TIMESTAMP)),
-                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ANGER_LEVEL)));
+                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ANGER_VAL)));
 
         cursor.close();
 
@@ -90,7 +90,7 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
     public AngerLevel getLastAngerLevel(SQLiteDatabase db){
         Cursor cursor = db.query(AngerLevel.TABLE_NAME,
                 new String[]{AngerLevel.COLUMN_ID, AngerLevel.COLUMN_TIMESTAMP,
-                        AngerLevel.COLUMN_ANGER_LEVEL},
+                        AngerLevel.COLUMN_ANGER_VAL},
                 null, null, null, null,
                 AngerLevel.COLUMN_TIMESTAMP + " DESC");
 
@@ -105,7 +105,7 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
         AngerLevel note = new AngerLevel(
                 cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ID)),
                 cursor.getLong(cursor.getColumnIndex(AngerLevel.COLUMN_TIMESTAMP)),
-                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ANGER_LEVEL)));
+                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ANGER_VAL)));
 
         cursor.close();
 
@@ -115,7 +115,7 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
     public AngerLevel getPenultimateAngerLevel(SQLiteDatabase db){
         Cursor cursor = db.query(AngerLevel.TABLE_NAME,
                 new String[]{AngerLevel.COLUMN_ID, AngerLevel.COLUMN_TIMESTAMP,
-                        AngerLevel.COLUMN_ANGER_LEVEL},
+                        AngerLevel.COLUMN_ANGER_VAL},
                 null, null, null, null,
                 AngerLevel.COLUMN_TIMESTAMP + " DESC LIMIT 1,1");
 
@@ -127,7 +127,7 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
         AngerLevel note = new AngerLevel(
                 cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ID)),
                 cursor.getLong(cursor.getColumnIndex(AngerLevel.COLUMN_TIMESTAMP)),
-                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ANGER_LEVEL)));
+                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ANGER_VAL)));
 
         cursor.close();
 

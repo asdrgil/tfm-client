@@ -8,6 +8,7 @@ import com.rarawa.tfm.sqlite.controllers.AngerLevelHandler;
 import com.rarawa.tfm.sqlite.controllers.CalibrateSleepHandler;
 import com.rarawa.tfm.sqlite.controllers.CalibrateExerciseHandler;
 import com.rarawa.tfm.sqlite.controllers.DisplayedPatternHandler;
+import com.rarawa.tfm.sqlite.controllers.HistoryHandler;
 import com.rarawa.tfm.sqlite.controllers.PatternsHandler;
 import com.rarawa.tfm.sqlite.controllers.ReasonAngerHandler;
 import com.rarawa.tfm.sqlite.controllers.UserInfoHandler;
@@ -20,6 +21,9 @@ import com.rarawa.tfm.sqlite.models.ReasonAnger;
 import com.rarawa.tfm.sqlite.models.UserInfo;
 import com.rarawa.tfm.utils.Constants;
 
+import java.util.Calendar;
+import java.util.HashMap;
+
 public class SqliteHandler extends SQLiteOpenHelper {
 
     CalibrateSleepHandler calibrateSleepHandler;
@@ -29,6 +33,7 @@ public class SqliteHandler extends SQLiteOpenHelper {
     AngerLevelHandler angerLevelHandler;
     ReasonAngerHandler reasonAngerHandler;
     DisplayedPatternHandler displayedPatternHandler;
+    HistoryHandler historyHandler;
 
     public SqliteHandler(Context context) {
         super(context, Constants.SQLITE_DB_NAME, null, Constants.SQLITE_VERSION);
@@ -39,6 +44,7 @@ public class SqliteHandler extends SQLiteOpenHelper {
         angerLevelHandler = new AngerLevelHandler(context);
         reasonAngerHandler = new ReasonAngerHandler(context);
         displayedPatternHandler = new DisplayedPatternHandler(context);
+        historyHandler = new HistoryHandler(context);
     }
 
     public void onCreate(SQLiteDatabase db) {
@@ -72,7 +78,10 @@ public class SqliteHandler extends SQLiteOpenHelper {
 
     public int insertWakeUpCalibrate() {
         return calibrateSleepHandler.insertWakeUpCalibrate(this.getWritableDatabase());
+    }
 
+    public int insertWakeUpDebugCalibrate() {
+        return calibrateSleepHandler.insertWakeUpDebugCalibrate(this.getWritableDatabase());
     }
 
     public void undoSleepCalibrate() {
@@ -101,6 +110,10 @@ public class SqliteHandler extends SQLiteOpenHelper {
 
     public void insertEndExercise() {
         calibrateExerciseHandler.insertEndExercise(this.getWritableDatabase());
+    }
+
+    public void insertEndExerciseDebug() {
+        calibrateExerciseHandler.insertEndExerciseDebug(this.getWritableDatabase());
     }
 
     public void undoStartExercise() {
@@ -204,6 +217,16 @@ public class SqliteHandler extends SQLiteOpenHelper {
                 idFirstAngerLevel, reasonAnger, this.getWritableDatabase());
     }
 
+    public void insertReasonAngerFull(int idFirstAngerLevel, int idLastAngerLevel, int reasonAnger){
+        reasonAngerHandler.insertReasonAngerFull(
+                idFirstAngerLevel, idLastAngerLevel, reasonAnger, this.getWritableDatabase());
+    }
+
+    public void updateReasonAnger(int idFirstAngerLevel, int idLastAngerLevel){
+        reasonAngerHandler.updateReasonAnger(
+                idFirstAngerLevel, idLastAngerLevel, this.getWritableDatabase());
+    }
+
     public ReasonAnger getReasonAnger(int idFirstAngerLevel){
         return reasonAngerHandler.getReasonAnger(idFirstAngerLevel, this.getReadableDatabase());
     }
@@ -215,8 +238,24 @@ public class SqliteHandler extends SQLiteOpenHelper {
                 angerLevelId, patternId, this.getWritableDatabase());
     }
 
+    public void insertDisplayedPatternDebug(int angerLevelId, int patternId,
+                                            int status, String comment){
+        displayedPatternHandler.insertDisplayedPatternDebug(
+                angerLevelId, patternId, status, comment, this.getWritableDatabase());
+    }
+
     public void updateDisplayedPattern(DisplayedPattern displayedPattern){
         displayedPatternHandler.updateDisplayedPattern(displayedPattern, this.getWritableDatabase());
+    }
+
+    /* HISTORY METHODS */
+
+    public HashMap<Long, Integer> getNumberEpisodesPerDay(long from, long to){
+        return historyHandler.getNumberEpisodesPerDay(from, to, this.getReadableDatabase());
+    }
+
+    public void updgradeDB(){
+        onUpgrade(this.getWritableDatabase(), 1, 1);
     }
 
 }

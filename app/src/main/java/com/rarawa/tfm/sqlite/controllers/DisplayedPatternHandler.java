@@ -44,6 +44,24 @@ public class DisplayedPatternHandler extends SQLiteOpenHelper {
 
     }
 
+    public long insertDisplayedPatternDebug(int angerLevelId, int patternId, int status, String comment, SQLiteDatabase db){
+
+        ContentValues values = new ContentValues();
+
+        values.put(DisplayedPattern.COLUMN_ANGER_LEVEL_ID, angerLevelId);
+        values.put(DisplayedPattern.COLUMN_PATTERN_ID, patternId);
+        values.put(DisplayedPattern.COLUMN_COMMENTS, comment);
+        values.put(DisplayedPattern.COLUMN_STATUS, status);
+
+        //Insert new register
+        long result = db.insert(DisplayedPattern.TABLE_NAME, null, values);
+
+        db.close();
+
+        return result;
+
+    }
+
     //TODO: implement it only if it is going to be neccesary
     /*public AngerLevel getDisplayedPatternByAngerLevelId(int angerLevel, SQLiteDatabase db){
     }*/

@@ -59,4 +59,5 @@
 
     <!-- Main fragment-->
     <string name="main_info">Main calibrated</string>
+    <string name="filter_episodes_title">Filtrar episodios</string>
 </resources>

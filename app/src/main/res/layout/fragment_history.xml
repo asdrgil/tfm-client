@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginTop="?actionBarSize"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/filterBox"
+        android:layout_marginTop="10dp"
+        android:layout_width="340dp"
+        android:layout_height="320dp"
+        android:background="@layout/border"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/titleFilterResults"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginRight="8dp"
+            android:gravity="center"
+            android:text="@string/filter_episodes_title"
+            android:textColor="@color/black"
+            android:textSize="32sp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textFrom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="50dp"
+            android:gravity="center"
+            android:text="Desde"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="@id/titleFilterResults"
+            app:layout_constraintTop_toTopOf="@id/inputQueryDate1Layout"
+            app:layout_constraintBottom_toBottomOf="@id/inputQueryDate1Layout"/>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/inputQueryDate1Layout"
+            android:layout_width="130dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:hint="(dd/mm/aaaa)"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="6dp"
+            app:counterMaxLength="10"
+            app:layout_constraintLeft_toRightOf="@id/textFrom"
+            app:layout_constraintTop_toBottomOf="@+id/titleFilterResults">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/inputQueryDate1Text"
+                android:layout_width="130dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center"
+                android:inputType="date"
+                android:maxLength="10"
+                android:textAlignment="center"
+                android:importantForAutofill="no"/>
+        </android.support.design.widget.TextInputLayout>
+
+        <ImageButton
+            android:id="@+id/btnQueryDate1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/ic_calendar"
+            app:layout_constraintLeft_toRightOf="@id/inputQueryDate1Layout"
+            app:layout_constraintTop_toTopOf="@+id/inputQueryDate1Layout"
+            app:layout_constraintBottom_toBottomOf="@+id/inputQueryDate1Layout" />
+
+        <TextView
+            android:id="@+id/textTo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Hasta"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="@id/textFrom"
+            app:layout_constraintTop_toTopOf="@id/inputQueryDate2Layout"
+            app:layout_constraintBottom_toBottomOf="@id/inputQueryDate2Layout"/>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/inputQueryDate2Layout"
+            android:layout_width="130dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:hint="(dd/mm/aaaa)"
+            android:layout_marginTop="10dp"
+            app:counterMaxLength="10"
+            app:layout_constraintStart_toStartOf="@+id/inputQueryDate1Layout"
+            app:layout_constraintTop_toBottomOf="@+id/inputQueryDate1Layout">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/inputQueryDate2Text"
+                android:layout_width="130dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center"
+                android:inputType="date"
+                android:maxLength="10"
+                android:textAlignment="center"
+                android:importantForAutofill="no"/>
+        </android.support.design.widget.TextInputLayout>
+
+        <ImageButton
+            android:id="@+id/btnQueryDate2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/ic_calendar"
+            app:layout_constraintLeft_toRightOf="@+id/inputQueryDate2Layout"
+            app:layout_constraintBottom_toBottomOf="@+id/inputQueryDate2Layout"
+            app:layout_constraintTop_toTopOf="@+id/inputQueryDate2Layout" />
+
+
+        <Button
+            android:id="@+id/btnFilterHistory"
+            android:layout_width="110dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="10dp"
+            android:text="Filtrar resultados"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:textSize="12sp"
+            app:layout_constraintTop_toBottomOf="@id/inputQueryDate2Layout" />
+
+    </android.support.constraint.ConstraintLayout>
+
+    <com.github.mikephil.charting.charts.BarChart
+        android:id="@+id/barchart1"
+        android:layout_width="340dp"
+        android:layout_height="220dp"
+        android:layout_marginTop="30dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/filterBox" />
+</android.support.constraint.ConstraintLayout>

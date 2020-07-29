@@ -31,6 +31,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -43,6 +44,7 @@ import android.widget.TextView;
 import com.rarawa.tfm.fragments.CalibrateExerciseFragment;
 import com.rarawa.tfm.fragments.CalibrateFragment;
 import com.rarawa.tfm.fragments.CalibrateSleepFragment;
+import com.rarawa.tfm.fragments.EpisodesHistoryFragment;
 import com.rarawa.tfm.fragments.MainFragment;
 import com.rarawa.tfm.fragments.MainFragment_0;
 import com.rarawa.tfm.fragments.MainFragment_1;
@@ -55,6 +57,7 @@ import com.rarawa.tfm.sqlite.SqliteHandler;
 import com.rarawa.tfm.sqlite.models.UserInfo;
 import com.rarawa.tfm.utils.ApiRest;
 import com.rarawa.tfm.utils.Constants;
+import com.rarawa.tfm.utils.InsertDebugRegisters;
 
 import java.util.Map;
 import java.util.UUID;
@@ -114,13 +117,16 @@ public class MainActivity extends AppCompatActivity {
 
         updateNavigationView();
 
+        InsertDebugRegisters.insertRegisters(getApplicationContext());
+
         username = findViewById(R.id.menu_username);
         //TODO: not working because username's findViewById returns null. FIX IT.
         //setNameLiteralMenu();
 
         if(registered){
             //Get updated patterns for the patient periodically
-            Handler handler = new Handler();
+            //TODO: uncomment it after tests
+            /*Handler handler = new Handler();
 
             //Review periodically if there are new pattern changes on the web that
             //need to be updated on the Android device
@@ -132,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             };
 
-            handler.post(runnableCode);
+            handler.post(runnableCode);*/
 
             if(calibrated) {
                 SharedPreferences sharedPref = getBaseContext().getSharedPreferences(
@@ -150,7 +156,8 @@ public class MainActivity extends AppCompatActivity {
                             Snackbar.LENGTH_LONG);
                 }
 
-                receiver = new BroadcastReceiver() {
+                //TODO: uncomment it after tests
+                /*receiver = new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
                         String message = intent.getStringExtra("MESSAGE");
@@ -165,10 +172,12 @@ public class MainActivity extends AppCompatActivity {
 
                         //updatePattern(context, currentAngerLevel);
                     }
-                };
+                };*/
             }
         }
     }
+
+
 
     /*private void updatePattern(Context context, int currentAngerLevel){
         SharedPreferences sharedPref = context.getSharedPreferences(
@@ -211,6 +220,8 @@ public class MainActivity extends AppCompatActivity {
         // Controlar este error
     }*/
 
+    //TODO: ver si es necesario este método (creo que no, que se puede llamar a fragment_main y
+    //ahí ya coge los datos.
     private void updateMainSubFragment(Context context, int currentAngerLevel){
         SharedPreferences sharedPref = context.getSharedPreferences(
                 Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
@@ -444,7 +455,7 @@ public class MainActivity extends AppCompatActivity {
                 item_summary.setEnabled(false);
 
                 MenuItem item_register = menu.findItem(R.id.item_navigation_drawer_register);
-                item_register.setEnabled(true);
+                item_register.setEnabled(false);
 
                 MenuItem item_calibrate = menu.findItem(R.id.item_navigation_drawer_calibrate);
                 item_calibrate.setEnabled(true);
@@ -460,7 +471,7 @@ public class MainActivity extends AppCompatActivity {
                 item_summary.setEnabled(false);
 
                 MenuItem item_register = menu.findItem(R.id.item_navigation_drawer_register);
-                item_register.setEnabled(true);
+                item_register.setEnabled(false);
 
                 MenuItem item_calibrate = menu.findItem(R.id.item_navigation_drawer_calibrate);
                 item_calibrate.setEnabled(false);
@@ -476,10 +487,10 @@ public class MainActivity extends AppCompatActivity {
                 item_summary.setEnabled(true);
 
                 MenuItem item_register = menu.findItem(R.id.item_navigation_drawer_register);
-                item_register.setEnabled(true);
+                item_register.setEnabled(false);
 
                 MenuItem item_calibrate = menu.findItem(R.id.item_navigation_drawer_calibrate);
-                item_calibrate.setEnabled(true);
+                item_calibrate.setEnabled(false);
 
                 setFragment(Constants.FRAGMENT_MAIN);
 
@@ -525,8 +536,20 @@ public class MainActivity extends AppCompatActivity {
 
                             case R.id.item_navigation_drawer_register:
                                 menuItem.setChecked(true);
-                                setFragment("register");
                                 drawerLayout.closeDrawer(GravityCompat.START);
+                                setFragment(Constants.FRAGMENT_REGISTER);
+                                return true;
+
+                            case R.id.item_navigation_drawer_calibrate:
+                                menuItem.setChecked(true);
+                                drawerLayout.closeDrawer(GravityCompat.START);
+                                setFragment(Constants.FRAGMENT_CALIBRATE);
+                                return true;
+
+                            case R.id.item_navigation_drawer_summary:
+                                menuItem.setChecked(true);
+                                drawerLayout.closeDrawer(Gravity.START);
+                                setFragment(Constants.FRAGMENT_HISTORY);
                                 return true;
                         }
 
@@ -645,9 +668,13 @@ public class MainActivity extends AppCompatActivity {
                 fragmentTransaction.replace(R.id.fragment, calibrateSleepFragment);
                 break;
             case Constants.FRAGMENT_CALIBRATE_EXERCISE:
-                Log.d(Constants.LOG_TAG, "FRAGMENT_CALIBRATE_EXERCISE");
                 CalibrateExerciseFragment calibrateExerciseFragment = new CalibrateExerciseFragment();
                 fragmentTransaction.replace(R.id.fragment, calibrateExerciseFragment);
+                break;
+
+            case Constants.FRAGMENT_HISTORY:
+                EpisodesHistoryFragment episodesHistoryFragment = new EpisodesHistoryFragment();
+                fragmentTransaction.replace(R.id.fragment, episodesHistoryFragment);
                 break;
         }
 
@@ -725,13 +752,14 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
 
         if(registered && calibrated) {
-            LocalBroadcastManager.getInstance(this).registerReceiver((receiver),
+            //TODO: uncomment after tests
+            /*LocalBroadcastManager.getInstance(this).registerReceiver((receiver),
                     new IntentFilter("RESULT")
             );
 
             Intent intent = new Intent(this, GenerateEpisodesService.class);
             startService(intent);
-            bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+            bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);*/
         }
 
 
@@ -741,11 +769,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
 
         if(registered && calibrated) {
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+            /*LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
             if (mServiceBound) {
                 unbindService(mServiceConnection);
                 mServiceBound = false;
-            }
+            }*/
         }
 
         super.onStop();

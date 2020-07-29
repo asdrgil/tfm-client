@@ -84,6 +84,37 @@ public class CalibrateSleepHandler extends SQLiteOpenHelper {
         }
     }
 
+    public static int insertWakeUpDebugCalibrate(SQLiteDatabase db) {
+
+        if(calibrateSleepExists(db) == 0){
+            return -1;
+        } else {
+
+            CalibrateSleep calibrate = getCalibrate(db);
+
+            if(calibrate.getStartTimestamp() == 0){
+                return -1;
+            }
+
+            //Everything went ok, write the wake up time
+
+            //Get writable database
+            ContentValues values = new ContentValues();
+
+            long wakeupTime = calibrate.getStartTimestamp() + MINIMUM_SLEEP_CALIBRATE_TIME + 1;
+
+            values.put(CalibrateSleep.COLUMN_END_TIMESTAMP, wakeupTime);
+
+            db.update(CalibrateSleep.TABLE_NAME, values, CalibrateSleep.COLUMN_ID + " = ?",
+                    new String[]{String.valueOf(calibrate.getId())});
+
+            db.close();
+
+            return 1;
+
+        }
+    }
+
     public static void undoSleepCalibrate(SQLiteDatabase db) {
         ContentValues values = new ContentValues();
 
@@ -123,7 +154,6 @@ public class CalibrateSleepHandler extends SQLiteOpenHelper {
         String countQuery = String.format("SELECT * FROM %s", CalibrateSleep.TABLE_NAME);
 
         Cursor cursor = db.rawQuery(countQuery, null);
-
 
         //Calibrate does not exist
         if(cursor.getCount() == 0){
