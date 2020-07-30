@@ -76,10 +76,12 @@ public class ReasonAngerHandler extends SQLiteOpenHelper {
                 new String[]{String.valueOf(idFirstAngerLevel)},
                 null, null, null, null);
 
+        /*
         if (cursor != null)
             cursor.moveToFirst();
         else
             return null;
+        */
 
         ReasonAnger note = new ReasonAnger(
                 cursor.getInt(cursor.getColumnIndex(ReasonAnger.COLUMN_ID)),

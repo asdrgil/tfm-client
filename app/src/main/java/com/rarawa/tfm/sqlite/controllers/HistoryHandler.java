@@ -10,13 +10,12 @@ import com.rarawa.tfm.sqlite.models.AngerLevel;
 import com.rarawa.tfm.sqlite.models.ReasonAnger;
 import com.rarawa.tfm.utils.Constants;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
+
+import static com.rarawa.tfm.utils.Constants.LOG_TAG;
 
 public class HistoryHandler extends SQLiteOpenHelper {
     public HistoryHandler(Context context) {
@@ -41,18 +40,16 @@ public class HistoryHandler extends SQLiteOpenHelper {
                 AngerLevel.COLUMN_TIMESTAMP, from, to,
                 AngerLevel.COLUMN_TIMESTAMP);
 
-        Log.d(Constants.LOG_TAG, "Query:\n" + query);
+        Log.d(LOG_TAG, "query:\n" + query);
 
         Cursor cursor = db.rawQuery(query, null);
 
-        if (cursor != null)
-            cursor.moveToFirst();
-        else
-            return null;
+        int count = cursor.getCount();
 
-        HashMap<Long, Integer> result = new HashMap<Long, Integer>();
+        HashMap<Long, Integer> result = new HashMap<>();
 
-        while(cursor.moveToNext()) {
+        for(int i = 0; i < count; i++){
+            cursor.moveToNext();
             Calendar currentCalendar = Calendar.getInstance();
             long currentTimestamp = cursor.getInt(0);
 
@@ -75,10 +72,96 @@ public class HistoryHandler extends SQLiteOpenHelper {
             }
         }
 
-        Log.d(Constants.LOG_TAG, "getNumberEpisodesPerDay size: " + result.size());
+        cursor.close();
+
+        Log.d(LOG_TAG, "getNumberEpisodesPerDay size: " + result.size());
 
         return result;
     }
 
+    //Returns episodes duration in seconds
+    public HashMap<Long, Integer> getEpisodesDurationPerDay(long from, long to, SQLiteDatabase db){
+
+        String query =  String.format("SELECT T11.%s, abs(T11.%s - T12.%s) " +
+                "FROM %s T2 " +
+                "INNER JOIN %s T11 ON T2.%s = T11.%s " +
+                "INNER JOIN %s T12 ON T2.%s = T12.%s " +
+                "WHERE T11.%s > %d " +
+                "AND T12.%s < %d " +
+                "ORDER BY T2.%s ASC;",
+                AngerLevel.COLUMN_TIMESTAMP, AngerLevel.COLUMN_TIMESTAMP, AngerLevel.COLUMN_TIMESTAMP,
+                ReasonAnger.TABLE_NAME,
+                AngerLevel.TABLE_NAME, ReasonAnger.COLUMN_ID_FIRST_ANGER_LEVEL, AngerLevel.COLUMN_ID,
+                AngerLevel.TABLE_NAME, ReasonAnger.COLUMN_ID_LAST_ANGER_LEVEL, AngerLevel.COLUMN_ID,
+                AngerLevel.COLUMN_TIMESTAMP, from,
+                AngerLevel.COLUMN_TIMESTAMP, to,
+                ReasonAnger.COLUMN_ID);
+
+        Log.d(LOG_TAG, "Query:\n" + query);
+
+        Cursor cursor = db.rawQuery(query, null);
+        int count = cursor.getCount();
+
+        Log.d(LOG_TAG, "number of registers: " + count);
+
+        HashMap<Long, Integer> result = new HashMap<>();
+
+        for(int i=0; i<count; i++){
+            cursor.moveToNext();
+
+            Calendar currentCalendar = Calendar.getInstance();
+            long currentTimestamp = cursor.getInt(0);
+            int difference = cursor.getInt(1);
+
+            currentCalendar.setTimeInMillis(currentTimestamp * 1000);
+
+            //Get rid of the part of the timestamp belonging to the time
+            long currentValueDayTimestamp = currentTimestamp -
+                    (currentCalendar.get(Calendar.HOUR_OF_DAY)*3600 +
+                            currentCalendar.get(Calendar.MINUTE)*60 +
+                            currentCalendar.get(Calendar.SECOND));
+
+            if (result.containsKey(currentValueDayTimestamp)){
+                int totalDuration = result.get(currentValueDayTimestamp);
+                totalDuration += difference;
+
+                result.remove(currentValueDayTimestamp);
+                result.put(currentValueDayTimestamp, totalDuration);
+            } else{
+                result.put(currentValueDayTimestamp, difference);
+            }
+        }
+
+        cursor.close();
+
+        Log.d(LOG_TAG, "getNumberEpisodesPerDay size: " + result.size());
+
+        return result;
+    }
+
+
+    //Returns episodes duration in seconds
+    public HashMap<Long, Integer> getEpisodesAverageDurationPerDay(long from, long to, SQLiteDatabase db){
+
+        HashMap<Long, Integer> numEpisodesDay = getNumberEpisodesPerDay(from, to, db);
+        HashMap<Long, Integer> durationEpisodesDay =getEpisodesDurationPerDay(from, to, db);
+        HashMap<Long, Integer> result  = new HashMap<>();
+
+        Iterator it = numEpisodesDay.entrySet().iterator();
+
+        while (it.hasNext()) {
+            Log.d(LOG_TAG, "INSIDE ITERATOR");
+
+            Map.Entry element = (Map.Entry) it.next();
+            long timestamp = Long.parseLong(element.getKey().toString());
+            int numberEpisodesDay = Integer.parseInt(element.getValue().toString());
+            int durationEpisodes = durationEpisodesDay.get(timestamp);
+            result.put(timestamp, durationEpisodes / numberEpisodesDay);
+        }
+
+        Log.d(LOG_TAG, "result.size(): " + result.size());
+
+        return result;
+    }
 
 }

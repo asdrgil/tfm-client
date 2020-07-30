@@ -254,8 +254,16 @@ public class SqliteHandler extends SQLiteOpenHelper {
         return historyHandler.getNumberEpisodesPerDay(from, to, this.getReadableDatabase());
     }
 
+    public HashMap<Long, Integer> getEpisodesDurationPerDay(long from, long to){
+        return historyHandler.getEpisodesDurationPerDay(from, to, this.getReadableDatabase());
+    }
+
+    public HashMap<Long, Integer> getEpisodesAverageDurationPerDay(long from, long to){
+        return historyHandler.getEpisodesAverageDurationPerDay(from, to, this.getReadableDatabase());
+    }
+
     public void updgradeDB(){
-        onUpgrade(this.getWritableDatabase(), 1, 1);
+        onUpgrade(this.getWritableDatabase(), 1, 2);
     }
 
 }

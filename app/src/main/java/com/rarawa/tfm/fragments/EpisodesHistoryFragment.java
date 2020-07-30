@@ -1,8 +1,6 @@
 package com.rarawa.tfm.fragments;
 
 import android.app.DatePickerDialog;
-import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
@@ -13,9 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
-import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.Description;
@@ -23,43 +19,31 @@ import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.formatter.ValueFormatter;
-import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
-import com.github.mikephil.charting.utils.ColorTemplate;
 import com.rarawa.tfm.R;
 import com.rarawa.tfm.sqlite.SqliteHandler;
-import com.rarawa.tfm.sqlite.controllers.HistoryHandler;
 import com.rarawa.tfm.utils.Constants;
 import com.rarawa.tfm.utils.DayAxisValueFormatter;
 
-import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-
-import static com.rarawa.tfm.utils.Constants.ONE_DAY_TIMESTAMP;
 
 public class EpisodesHistoryFragment extends Fragment implements View.OnClickListener {
 
     public View rootView;
 
     private static final String ZERO = "0";
-    private static final String TWO_DOTS = ":";
     private static final String SLASH = "/";
 
     public final Calendar calendar = Calendar.getInstance();
-    public final Calendar calendar1 = Calendar.getInstance();
-    public final Calendar calendar2 = Calendar.getInstance();
 
     //Date
     final int day = calendar.get(Calendar.DAY_OF_MONTH);
@@ -81,35 +65,23 @@ public class EpisodesHistoryFragment extends Fragment implements View.OnClickLis
         inputQueryDateText1 = rootView.findViewById(R.id.inputQueryDate1Text);
         inputQueryDateText2 = rootView.findViewById(R.id.inputQueryDate2Text);
 
-        btnQueryDate1 = (ImageButton) rootView.findViewById(R.id.btnQueryDate1);
-        btnQueryDate2 = (ImageButton) rootView.findViewById(R.id.btnQueryDate2);
-        btnFilterHistory = (Button) rootView.findViewById(R.id.btnFilterHistory);
+        btnQueryDate1 = rootView.findViewById(R.id.btnQueryDate1);
+        btnQueryDate2 = rootView.findViewById(R.id.btnQueryDate2);
+        btnFilterHistory = rootView.findViewById(R.id.btnFilterHistory);
 
         btnQueryDate1.setOnClickListener(this);
         btnQueryDate2.setOnClickListener(this);
         btnFilterHistory.setOnClickListener(this);
 
+        BarChart chart1 = rootView.findViewById(R.id.barchart1);
+        chart1.setNoDataText("No se ha encontrado ningún registro");
+        BarChart chart2 = rootView.findViewById(R.id.barchart2);
+        chart2.setNoDataText("No se ha encontrado ningún registro");
 
-        //HashMap<Long, Integer> episodesPreviousWeek = getEpisodesPreviousWeek();
-
-        //db.getNumberEpisodesPerDay(1595683560, 1595683850);
-
-        //TODO: revisar a fondo con una semana en la que haya registros.
-        //TODO: mirar el formato y basarse en setBarchart1
-        //setBarchart2(rootView, episodesPreviousWeek);
+        //TODO: revisar a fondo cuando hay más de 15 registros que graficar
+        // (seguramente haya que agrupar por meses)
 
         return rootView;
-    }
-
-    public HashMap<Long, Integer> getEpisodesPreviousWeek(){
-        SqliteHandler db = new SqliteHandler(getContext());
-
-        long currentTimestamp = System.currentTimeMillis()/1000;
-        long previousWeekTimestamp = currentTimestamp - 7*24*60*60;
-
-        HashMap<Long, Integer> result = db.getNumberEpisodesPerDay(currentTimestamp, previousWeekTimestamp);
-
-        return result;
     }
 
     @Override
@@ -122,22 +94,34 @@ public class EpisodesHistoryFragment extends Fragment implements View.OnClickLis
                 getDate(1);
                 break;
             case R.id.btnFilterHistory:
-                HashMap<Long, Integer> search = performSearch();
-                if(search != null){
-                    setBarchart2(search);
+                if(isInputDateCorrect()) {
+                    Map<Integer, Long> timestamps = getInputTimestamp();
+
+                    HashMap<Long, Integer> searchBarchar1 = searchBarchar1(timestamps);
+                    HashMap<Long, Integer> searchBarchar2 = searchBarchar2(timestamps);
+                    HashMap<Long, Integer> searchBarchar3 = searchBarchar3(timestamps);
+
+                    if (searchBarchar1 != null) {
+                        plotBarchart1(searchBarchar1);
+
+                    }
+
+                    if (searchBarchar2 != null) {
+                        plotBarchart2(searchBarchar2);
+                    }
+
+                    if (searchBarchar3 != null) {
+                        plotBarchart3(searchBarchar3);
+                    }
                 }
                 break;
         }
     }
 
-    private HashMap<Long, Integer> performSearch(){
-        Log.d(Constants.LOG_TAG, "performSearch()");
+    private boolean isInputDateCorrect(){
 
-        SqliteHandler db = new SqliteHandler(getContext());
         String queryDate1 = inputQueryDateText1.getText().toString();
         String queryDate2 = inputQueryDateText2.getText().toString();
-
-        /* Multiple error checkings */
 
         String errorEmptyField = "Es necesario rellenar este campo";
         String errorInvalidFormat = "Formato de fecha incorrecto";
@@ -153,27 +137,27 @@ public class EpisodesHistoryFragment extends Fragment implements View.OnClickLis
             Log.d(Constants.LOG_TAG, "setError");
             inputQueryDateLayout1.requestFocus();
             inputQueryDateLayout1.setError(errorEmptyField);
-            return null;
+            return false;
         }
 
         if(queryDate2.length() == 0){
             inputQueryDateLayout2.requestFocus();
             inputQueryDateLayout2.setError(errorEmptyField);
-            return null;
+            return false;
         }
 
         //Invalid date format
         if (!queryDate1.matches(regexDateFormat)){
             inputQueryDateLayout1.requestFocus();
             inputQueryDateLayout1.setError(errorInvalidFormat);
-            return null;
+            return false;
         }
 
         //Invalid date format
         if (!queryDate2.matches(regexDateFormat)){
             inputQueryDateLayout2.requestFocus();
             inputQueryDateLayout2.setError(errorInvalidFormat);
-            return null;
+            return false;
         }
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -189,63 +173,90 @@ public class EpisodesHistoryFragment extends Fragment implements View.OnClickLis
         } catch (ParseException e) {
             Log.d(Constants.LOG_TAG, "ParseException");
             e.printStackTrace();
+            return false;
         }
 
         if(timestamp1 > timestamp2){
             inputQueryDateLayout1.requestFocus();
             inputQueryDateLayout1.setError(errorGreaterThan);
-            return null;
+            return false;
         }
 
         if(timestamp1 > System.currentTimeMillis()/1000){
             inputQueryDateLayout1.requestFocus();
             inputQueryDateLayout1.setError(errorGreaterThanCurrent);
-            return null;
+            return false;
         }
 
         if(timestamp2 > System.currentTimeMillis()/1000){
             inputQueryDateLayout2.requestFocus();
             inputQueryDateLayout2.setError(errorGreaterThanCurrent);
-            return null;
+            return false;
         }
 
         Log.d(Constants.LOG_TAG, "timestamp1: " + timestamp1);
         Log.d(Constants.LOG_TAG, "timestamp2: " + timestamp2);
 
-        return db.getNumberEpisodesPerDay(timestamp1,
-                timestamp2);
+        return true;
 
     }
 
-    private void getDate(int dateId){
-        DatePickerDialog getDateVar = new DatePickerDialog(getContext(), new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+    private Map<Integer, Long> getInputTimestamp(){
+        String queryDate1 = inputQueryDateText1.getText().toString();
+        String queryDate2 = inputQueryDateText2.getText().toString();
 
-                final int currentMonth = month + 1;
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        long timestamp1 = 0;
+        long timestamp2 = 0;
 
-                String formattedDay = (dayOfMonth < 10)? ZERO + String.valueOf(dayOfMonth):String.valueOf(dayOfMonth);
-                String formattedMonth = (currentMonth < 10)? ZERO + String.valueOf(currentMonth):String.valueOf(currentMonth);
-                String formattedText = formattedDay + SLASH + formattedMonth + SLASH + year;
+        try {
+            Date date1=dateFormat.parse(queryDate1);
+            timestamp1 = date1.getTime()/1000;
 
-                Log.d(Constants.LOG_TAG, formattedText);
+            Date date2=dateFormat.parse(queryDate2);
+            timestamp2 = date2.getTime()/1000;
+        } catch (ParseException e) {
+            //
+        }
 
-                if(dateId == 0) {
-                    inputQueryDateText1.setText(formattedText);
-                } else {
-                    inputQueryDateText2.setText(formattedText);
-                }
+        Map<Integer, Long> result = new HashMap<>();
 
+        result.put(0, timestamp1);
+        result.put(1, timestamp2);
 
-            }
-        },year, month, day);
+        return result;
+    }
 
-        getDateVar.show();
+    private HashMap<Long, Integer> searchBarchar1(Map<Integer, Long> timestamps){
+        Log.d(Constants.LOG_TAG, "searchBarchar1()");
+        SqliteHandler db = new SqliteHandler(getContext());
+
+        return db.getNumberEpisodesPerDay(timestamps.get(0),
+                timestamps.get(1));
 
     }
 
-    public void setBarchart2(HashMap<Long, Integer> dataRegisters){
+    private HashMap<Long, Integer> searchBarchar3(Map<Integer, Long> timestamps){
+        Log.d(Constants.LOG_TAG, "searchBarchar2()");
+        SqliteHandler db = new SqliteHandler(getContext());
+
+        return db.getEpisodesDurationPerDay(timestamps.get(0),
+                timestamps.get(1));
+
+    }
+
+    private HashMap<Long, Integer> searchBarchar2(Map<Integer, Long> timestamps){
+        Log.d(Constants.LOG_TAG, "searchBarchar3()");
+        SqliteHandler db = new SqliteHandler(getContext());
+
+        return db.getEpisodesAverageDurationPerDay(timestamps.get(0),
+                timestamps.get(1));
+
+    }
+
+    public void plotBarchart1(HashMap<Long, Integer> dataRegisters){
         BarChart chart = rootView.findViewById(R.id.barchart1);
+        chart.setVisibility(View.VISIBLE);
 
         if(dataRegisters != null && !dataRegisters.isEmpty()) {
 
@@ -307,47 +318,157 @@ public class EpisodesHistoryFragment extends Fragment implements View.OnClickLis
         }
     }
 
-    /*public void setBarchart1(View rootView){
-        BarChart chart = rootView.findViewById(R.id.barchart1);
+    public void plotBarchart2(HashMap<Long, Integer> dataRegisters){
+        BarChart chart = rootView.findViewById(R.id.barchart2);
+        chart.setVisibility(View.VISIBLE);
 
-        List<BarEntry> entries = new ArrayList<>();
-        entries.add(new BarEntry(200f, 3f));
-        entries.add(new BarEntry(100f, 8f));
-        entries.add(new BarEntry(150f, 6f));
-        entries.add(new BarEntry(151f, 1f));
-        // gap of 2f
-        entries.add(new BarEntry(152f, 7f));
-        entries.add(new BarEntry(156f, 2f));
+        if(dataRegisters != null && !dataRegisters.isEmpty()) {
 
-        BarDataSet set = new BarDataSet(entries, "Episodios/Día");
+            ArrayList<BarEntry> barRegisters = new ArrayList<>();
 
-        set.setColor(ColorTemplate.rgb("#008000"));
+            float minimumTimestamp = 0;
+            float maximumTimestamp = 0;
 
-        ValueFormatter xAxisFormatter = new DayAxisValueFormatter(chart);
+            Iterator it = dataRegisters.entrySet().iterator();
+            float i = 0;
 
-        XAxis xAxis = chart.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setDrawGridLines(false);
-        xAxis.setGranularity(Constants.MEASUREMENT_FREQUENCY/1000); // only intervals of 1 day
-        xAxis.setLabelCount(7);
-        //xAxis.setValueFormatter(xAxisFormatter);
+            while (it.hasNext()) {
+                Map.Entry element = (Map.Entry) it.next();
 
-        Description description = new Description();
-        description.setText("");
+                if(minimumTimestamp == 0 ||
+                        minimumTimestamp > Long.parseLong(element.getKey().toString())){
+                    minimumTimestamp = Long.parseLong(element.getKey().toString());
+                }
 
-        chart.setDescription(description);
+                if(maximumTimestamp == 0 ||
+                        maximumTimestamp < Long.parseLong(element.getKey().toString())){
+                    maximumTimestamp = Long.parseLong(element.getKey().toString());
+                }
 
-        BarData data = new BarData(set);
-        data.setBarWidth(0.9f); // set custom bar width
-        chart.setData(data);
-        chart.setHighlightFullBarEnabled(true);
-        //chart.setFitBars(true); // make the x-axis fit exactly all bars
-        chart.setDrawGridBackground(false);
-        chart.setDrawBorders(true);
-        chart.setContentDescription("Content description tryout");
-        chart.setNoDataText("No se ha encontrado ningún registro");
-        chart.animateXY(300, 700);
-        chart.invalidate(); // refresh
-    }*/
+                barRegisters.add(new BarEntry(i++,
+                        Float.parseFloat(element.getValue().toString())));
+            }
+
+            BarDataSet set = new BarDataSet(barRegisters, "Duración media de los episodios [segundos]/Día");
+            set.setColor(ColorTemplate.rgb("#21618C"));
+
+            ValueFormatter xAxisFormatter = new DayAxisValueFormatter(chart, dataRegisters);
+
+            XAxis xAxis = chart.getXAxis();
+            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+            xAxis.setDrawGridLines(false);
+            xAxis.setGranularity(1f);
+            xAxis.setLabelCount(dataRegisters.size());
+            xAxis.mAxisMinimum = minimumTimestamp;
+            xAxis.mAxisMaximum = maximumTimestamp;
+            xAxis.setValueFormatter(xAxisFormatter);
+
+            Description description = new Description();
+            description.setText("");
+
+            chart.setDescription(description);
+
+            BarData data = new BarData(set);
+            data.setBarWidth(0.9f); // set custom bar width
+            chart.setData(data);
+            chart.setHighlightFullBarEnabled(true);
+            //chart.setFitBars(true); // make the x-axis fit exactly all bars
+            chart.setDrawGridBackground(false);
+            chart.setDrawBorders(true);
+            chart.setContentDescription("Content description tryout");
+            chart.animateXY(300, 700);
+            chart.invalidate(); // refresh
+        }
+    }
+
+    public void plotBarchart3(HashMap<Long, Integer> dataRegisters){
+        BarChart chart = rootView.findViewById(R.id.barchart3);
+        chart.setVisibility(View.VISIBLE);
+
+        if(dataRegisters != null && !dataRegisters.isEmpty()) {
+
+            ArrayList<BarEntry> barRegisters = new ArrayList<>();
+
+            float minimumTimestamp = 0;
+            float maximumTimestamp = 0;
+
+            Iterator it = dataRegisters.entrySet().iterator();
+            float i = 0;
+
+            while (it.hasNext()) {
+                Map.Entry element = (Map.Entry) it.next();
+
+                if(minimumTimestamp == 0 ||
+                        minimumTimestamp > Long.parseLong(element.getKey().toString())){
+                    minimumTimestamp = Long.parseLong(element.getKey().toString());
+                }
+
+                if(maximumTimestamp == 0 ||
+                        maximumTimestamp < Long.parseLong(element.getKey().toString())){
+                    maximumTimestamp = Long.parseLong(element.getKey().toString());
+                }
+
+                barRegisters.add(new BarEntry(i++,
+                        Float.parseFloat(element.getValue().toString())));
+            }
+
+            BarDataSet set = new BarDataSet(barRegisters, "Duración total de los episodios [segundos]/Día");
+            set.setColor(ColorTemplate.rgb("#FFA500"));
+
+            ValueFormatter xAxisFormatter = new DayAxisValueFormatter(chart, dataRegisters);
+
+            XAxis xAxis = chart.getXAxis();
+            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+            xAxis.setDrawGridLines(false);
+            xAxis.setGranularity(1f);
+            xAxis.setLabelCount(dataRegisters.size());
+            xAxis.mAxisMinimum = minimumTimestamp;
+            xAxis.mAxisMaximum = maximumTimestamp;
+            xAxis.setValueFormatter(xAxisFormatter);
+
+            Description description = new Description();
+            description.setText("");
+
+            chart.setDescription(description);
+
+            BarData data = new BarData(set);
+            data.setBarWidth(0.9f); // set custom bar width
+            chart.setData(data);
+            chart.setHighlightFullBarEnabled(true);
+            //chart.setFitBars(true); // make the x-axis fit exactly all bars
+            chart.setDrawGridBackground(false);
+            chart.setDrawBorders(true);
+            chart.setContentDescription("Content description tryout");
+            chart.animateXY(300, 700);
+            chart.invalidate(); // refresh
+        }
+    }
+
+    private void getDate(int dateId){
+        DatePickerDialog getDateVar = new DatePickerDialog(getContext(), new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+
+                final int currentMonth = month + 1;
+
+                String formattedDay = (dayOfMonth < 10)? ZERO + String.valueOf(dayOfMonth):String.valueOf(dayOfMonth);
+                String formattedMonth = (currentMonth < 10)? ZERO + String.valueOf(currentMonth):String.valueOf(currentMonth);
+                String formattedText = formattedDay + SLASH + formattedMonth + SLASH + year;
+
+                Log.d(Constants.LOG_TAG, formattedText);
+
+                if(dateId == 0) {
+                    inputQueryDateText1.setText(formattedText);
+                } else {
+                    inputQueryDateText2.setText(formattedText);
+                }
+
+
+            }
+        },year, month, day);
+
+        getDateVar.show();
+
+    }
 
 }
