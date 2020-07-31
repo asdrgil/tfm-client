@@ -23,6 +23,7 @@ import com.rarawa.tfm.utils.Constants;
 
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Map;
 
 public class SqliteHandler extends SQLiteOpenHelper {
 
@@ -248,6 +249,11 @@ public class SqliteHandler extends SQLiteOpenHelper {
         displayedPatternHandler.updateDisplayedPattern(displayedPattern, this.getWritableDatabase());
     }
 
+    public HashMap<Integer, String> getTopUsefulPatterns(long from, long to, int limit){
+        return displayedPatternHandler
+                .getTopUsefulPatterns(from, to, limit, this.getReadableDatabase());
+    }
+
     /* HISTORY METHODS */
 
     public HashMap<Long, Integer> getNumberEpisodesPerDay(long from, long to){
@@ -260,6 +266,10 @@ public class SqliteHandler extends SQLiteOpenHelper {
 
     public HashMap<Long, Integer> getEpisodesAverageDurationPerDay(long from, long to){
         return historyHandler.getEpisodesAverageDurationPerDay(from, to, this.getReadableDatabase());
+    }
+
+    public HashMap<Integer, Integer> getTotalEpisodesTodayYesterday(){
+        return historyHandler.getTotalEpisodesTodayYesterday(this.getReadableDatabase());
     }
 
     public void updgradeDB(){

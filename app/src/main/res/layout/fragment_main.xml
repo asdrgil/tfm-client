@@ -46,7 +46,7 @@
         android:gravity="center_horizontal"
         android:inputType="textMultiLine"
         android:singleLine="false"
-        android:text="[DEBUG] Nivel de ira: verde [0/4]"
+        android:text="Nivel de ira: verde [0/4]"
         android:textAlignment="center"
         android:textColor="@color/black"
         android:textSize="20dp"

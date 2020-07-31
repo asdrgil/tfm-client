@@ -116,5 +116,5 @@ public class Constants {
     //Inactive time before making the old episode obsolete
     public static final int TIME_EPISODE_IS_OBSOLETE = 60*1000;
 
-    public static final float ONE_DAY_TIMESTAMP = 60*60*24;
+    public static final long ONE_DAY_TIMESTAMP = 60*60*24;
 }

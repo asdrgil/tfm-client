@@ -36,7 +36,7 @@
             android:gravity="center"
             android:inputType="textMultiLine"
             android:singleLine="false"
-            android:text="[DEBUG] Texto de la pauta"
+            android:text="Texto de la pauta"
             android:textAlignment="center"
             android:textSize="20dp"
             android:textStyle="bold|italic"

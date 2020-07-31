@@ -7,11 +7,19 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.rarawa.tfm.R;
 import com.rarawa.tfm.sqlite.models.AngerLevel;
 import com.rarawa.tfm.sqlite.models.CalibrateSleep;
 import com.rarawa.tfm.sqlite.models.DisplayedPattern;
+import com.rarawa.tfm.sqlite.models.Pattern;
 import com.rarawa.tfm.sqlite.models.UserInfo;
 import com.rarawa.tfm.utils.Constants;
+
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.rarawa.tfm.utils.Constants.LOG_TAG;
 
 public class DisplayedPatternHandler extends SQLiteOpenHelper {
     public DisplayedPatternHandler(Context context) {
@@ -81,6 +89,45 @@ public class DisplayedPatternHandler extends SQLiteOpenHelper {
                 new String[]{String.valueOf(displayedPattern.getId())});
 
         db.close();
+    }
+
+    public HashMap<Integer, String> getTopUsefulPatterns(long from, long to, int limit, SQLiteDatabase db){
+
+        String query = String.format("SELECT T2.%s, SUM(T1.%) " +
+                        "FROM %s T1 " +
+                        "INNER JOIN %s T2 ON  T1.patternId=T2.%s " +
+                        "INNER JOIN %s T3 ON  T1.%s=T3.%s " +
+                        "WHERE T3.%s BETWEEN %d AND %d " +
+                        "GROUP BY T1.%s " +
+                        "ORDER BY SUM(T1.%s) DESC, T2.%s ASC " +
+                        "LIMIT %d; ",
+                Pattern.COLUMN_NAME, DisplayedPattern.COLUMN_STATUS,
+                DisplayedPattern.TABLE_NAME,
+                Pattern.TABLE_NAME, DisplayedPattern.COLUMN_PATTERN_ID, Pattern.TABLE_NAME,
+                AngerLevel.TABLE_NAME, DisplayedPattern.COLUMN_ANGER_LEVEL_ID, Pattern.COLUMN_ID,
+                AngerLevel.COLUMN_TIMESTAMP, from, to,
+                DisplayedPattern.COLUMN_PATTERN_ID,
+                DisplayedPattern.COLUMN_STATUS, Pattern.COLUMN_ID,
+                limit);
+
+        Log.d(LOG_TAG, "query:\n" + query);
+
+        Cursor cursor = db.rawQuery(query, null);
+        int count = cursor.getCount();
+
+        HashMap<Integer, String> result = new HashMap<>();
+
+        for(int i = 0; i < count; i++) {
+            cursor.moveToNext();
+
+            String patternStr = cursor.getString(0);
+            int numberCoincidences = cursor.getInt(1);
+
+            result.put(i, String.format("%s|%d",patternStr, numberCoincidences));
+        }
+
+        return result;
+
     }
 
 }

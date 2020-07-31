@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.rarawa.tfm.sqlite.models.AngerLevel;
+import com.rarawa.tfm.sqlite.models.DisplayedPattern;
+import com.rarawa.tfm.sqlite.models.Pattern;
 import com.rarawa.tfm.sqlite.models.ReasonAnger;
 import com.rarawa.tfm.utils.Constants;
 
@@ -16,6 +18,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import static com.rarawa.tfm.utils.Constants.LOG_TAG;
+import static com.rarawa.tfm.utils.Constants.ONE_DAY_TIMESTAMP;
 
 public class HistoryHandler extends SQLiteOpenHelper {
     public HistoryHandler(Context context) {
@@ -162,6 +165,42 @@ public class HistoryHandler extends SQLiteOpenHelper {
         Log.d(LOG_TAG, "result.size(): " + result.size());
 
         return result;
+    }
+
+    public HashMap<Integer, Integer> getTotalEpisodesTodayYesterday(SQLiteDatabase db){
+
+        long currentTimestamp = System.currentTimeMillis()/1000;
+        long yesterdayTimestamp = currentTimestamp - ONE_DAY_TIMESTAMP;
+        long yesterday2Timestamp = currentTimestamp - ONE_DAY_TIMESTAMP*2;
+
+        HashMap<Integer, Integer> result = new HashMap<>();
+
+        int res0 = getNumberEpisodesPerDayNoCuts(currentTimestamp, currentTimestamp, db);
+        int res1= getNumberEpisodesPerDayNoCuts(yesterday2Timestamp, yesterdayTimestamp, db);
+
+        result.put(0, res0);
+        result.put(1, res1);
+
+        return result;
+    }
+
+    //Same as getNumberEpisodesPerDay but with customized time window
+    public int getNumberEpisodesPerDayNoCuts(long from, long to, SQLiteDatabase db){
+
+        String query = String.format("SELECT %s FROM %s WHERE %s IN (SELECT DISTINCT %s FROM %s) " +
+                        "AND %s BETWEEN %d AND %d ORDER BY %s ASC;",
+                AngerLevel.COLUMN_TIMESTAMP, AngerLevel.TABLE_NAME, AngerLevel.COLUMN_ID,
+                ReasonAnger.COLUMN_ID_FIRST_ANGER_LEVEL, ReasonAnger.TABLE_NAME,
+                AngerLevel.COLUMN_TIMESTAMP, from, to,
+                AngerLevel.COLUMN_TIMESTAMP);
+
+        Log.d(LOG_TAG, "query:\n" + query);
+
+        Cursor cursor = db.rawQuery(query, null);
+        int count = cursor.getCount();
+        cursor.close();
+
+        return count;
     }
 
 }
