@@ -55,7 +55,9 @@ public class MainFragment_0 extends Fragment {
 
         setString1();
         setString2();
-        setString3();
+
+        //TODO: crashes. Fix it
+        //setString3();
 
         return rootView;
     }

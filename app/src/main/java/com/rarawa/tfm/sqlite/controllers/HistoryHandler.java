@@ -43,7 +43,7 @@ public class HistoryHandler extends SQLiteOpenHelper {
                 AngerLevel.COLUMN_TIMESTAMP, from, to,
                 AngerLevel.COLUMN_TIMESTAMP);
 
-        Log.d(LOG_TAG, "query:\n" + query);
+        //Log.d(LOG_TAG, "query:\n" + query);
 
         Cursor cursor = db.rawQuery(query, null);
 
@@ -100,7 +100,7 @@ public class HistoryHandler extends SQLiteOpenHelper {
                 AngerLevel.COLUMN_TIMESTAMP, to,
                 ReasonAnger.COLUMN_ID);
 
-        Log.d(LOG_TAG, "Query:\n" + query);
+        //Log.d(LOG_TAG, "Query:\n" + query);
 
         Cursor cursor = db.rawQuery(query, null);
         int count = cursor.getCount();
@@ -194,7 +194,7 @@ public class HistoryHandler extends SQLiteOpenHelper {
                 AngerLevel.COLUMN_TIMESTAMP, from, to,
                 AngerLevel.COLUMN_TIMESTAMP);
 
-        Log.d(LOG_TAG, "query:\n" + query);
+        //Log.d(LOG_TAG, "query:\n" + query);
 
         Cursor cursor = db.rawQuery(query, null);
         int count = cursor.getCount();

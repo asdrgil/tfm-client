@@ -24,6 +24,18 @@
             android:name=".services.GenerateEpisodesService"
             android:label="BoundService">
         </service>
+        <service
+            android:name=".services.UpdateWidgetService"
+            android:label="BoundService">
+        </service>
+
+        <receiver android:name="com.rarawa.tfm.widget.WidgetProvider" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@layout/widget_info" />
+        </receiver>
     </application>
 
 </manifest>

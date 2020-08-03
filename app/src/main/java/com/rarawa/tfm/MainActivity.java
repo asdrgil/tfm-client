@@ -1,5 +1,6 @@
 package com.rarawa.tfm;
 
+import android.appwidget.AppWidgetManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -53,14 +54,19 @@ import com.rarawa.tfm.fragments.MainFragment_3;
 import com.rarawa.tfm.fragments.MainNotCalibratedFragment;
 import com.rarawa.tfm.fragments.RegisterFragment;
 import com.rarawa.tfm.services.GenerateEpisodesService;
+import com.rarawa.tfm.services.UpdateWidgetService;
 import com.rarawa.tfm.sqlite.SqliteHandler;
 import com.rarawa.tfm.sqlite.models.UserInfo;
 import com.rarawa.tfm.utils.ApiRest;
 import com.rarawa.tfm.utils.Constants;
-import com.rarawa.tfm.utils.InsertDebugRegisters;
+import com.rarawa.tfm.widget.WidgetProvider;
 
 import java.util.Map;
 import java.util.UUID;
+
+import androidx.constraintlayout.solver.widgets.WidgetContainer;
+
+import static com.rarawa.tfm.utils.Constants.LOG_TAG;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -82,6 +88,9 @@ public class MainActivity extends AppCompatActivity {
     GenerateEpisodesService mGenerateEpisodesService;
     boolean mServiceBound = false;
     BroadcastReceiver receiver;
+
+    UpdateWidgetService mUpdateWidgetService;
+    boolean mServiceBound2 = false;
 
     private static TextView username;
     private static NavigationView navigationView;
@@ -110,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.activity_main_layout);
 
         //startBLEStreaming();
+
         int calibrateSleep = db.calibrateSleepExists();
         int calibrateExercise = db.calibrateExerciseExists();
         calibrated = calibrateSleep + calibrateExercise == 6;
@@ -117,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
 
         updateNavigationView();
 
-        InsertDebugRegisters.insertRegisters(getApplicationContext());
+        //InsertDebugRegisters.insertRegisters(getApplicationContext());
 
         username = findViewById(R.id.menu_username);
         //TODO: not working because username's findViewById returns null. FIX IT.
@@ -126,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
         if(registered){
             //Get updated patterns for the patient periodically
             //TODO: uncomment it after tests
-            /*Handler handler = new Handler();
+            Handler handler = new Handler();
 
             //Review periodically if there are new pattern changes on the web that
             //need to be updated on the Android device
@@ -138,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             };
 
-            handler.post(runnableCode);*/
+            handler.post(runnableCode);
 
             if(calibrated) {
                 SharedPreferences sharedPref = getBaseContext().getSharedPreferences(
@@ -157,11 +167,11 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 //TODO: uncomment it after tests
-                /*receiver = new BroadcastReceiver() {
+                receiver = new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
                         String message = intent.getStringExtra("MESSAGE");
-                        Log.d(Constants.LOG_TAG, "Received string: " + message);
+                        Log.d(LOG_TAG, "Received string: " + message);
 
                         String messsageArr[] = message.split(",");
                         int currentAngerLevel = Integer.parseInt(messsageArr[0]);
@@ -172,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
 
                         //updatePattern(context, currentAngerLevel);
                     }
-                };*/
+                };
             }
         }
     }
@@ -228,8 +238,8 @@ public class MainActivity extends AppCompatActivity {
 
         int mainFragmentPref = sharedPref.getInt(Constants.SHAREDPREFERENCES_FRAGMENT_MAIN, 0);
 
-        Log.d(Constants.LOG_TAG, "currentAngerLevel:" + currentAngerLevel);
-        Log.d(Constants.LOG_TAG, "mainFragmentPref:" + mainFragmentPref);
+        Log.d(LOG_TAG, "currentAngerLevel:" + currentAngerLevel);
+        Log.d(LOG_TAG, "mainFragmentPref:" + mainFragmentPref);
 
         long firstTmpPlateau =
                 sharedPref.getLong(Constants.SHAREDPREFERENCES_FIRST_ZERO_LEVEL_PLATEAU, 0);
@@ -251,7 +261,7 @@ public class MainActivity extends AppCompatActivity {
             sharedPrefEditor.commit();
 
             if(mainFragmentPref == 0) {
-                Log.d(Constants.LOG_TAG, "currentAngerLevel > 0 && mainFragmentPref == 0");
+                Log.d(LOG_TAG, "currentAngerLevel > 0 && mainFragmentPref == 0");
                 setSubFragment(Constants.SUBFRAGMENT_MAIN.get(1));
             }
 
@@ -259,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
         //interacting with the previous episode => Discard the episode and upload the main fragment
         //used for the case when there are no episodes.
         } else if (mainFragmentPref > 0 && isOneMinuteRest){
-            Log.d(Constants.LOG_TAG, "isOneMinuteRest clause");
+            Log.d(LOG_TAG, "isOneMinuteRest clause");
 
             SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
             sharedPrefEditor.putString(Constants.SHAREDPREFERENCES_CURRENT_PATTERNS_ORDER, "");
@@ -271,14 +281,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateThermometer(ImageView thermoIcon, TextView thermoText, int currentAngerLevel){
-        Log.d(Constants.LOG_TAG, "updateThermometer");
+        Log.d(LOG_TAG, "updateThermometer");
 
         Map.Entry<Integer, String> currentEntry =
                 Constants.ANGER_LEVEL_UI_MAP.get(currentAngerLevel);
 
         //If the thermometer is not updated, update it
         if(!currentEntry.getValue().equals(thermoText)){
-            Log.d(Constants.LOG_TAG, "not updated");
+
             thermoText.setText(currentEntry.getValue());
             thermoIcon.setImageResource(currentEntry.getKey());
         }
@@ -408,7 +418,7 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Log.d(Constants.LOG_TAG, String.format(fmt + "\n", args));
+                Log.d(LOG_TAG, String.format(fmt + "\n", args));
             }
         });
     }
@@ -447,7 +457,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if(registered && !calibrated){
-                Log.d(Constants.LOG_TAG, "registered && !calibrated");
+                Log.d(LOG_TAG, "registered && !calibrated");
 
                 Menu menu = navigationView.getMenu();
 
@@ -463,7 +473,7 @@ public class MainActivity extends AppCompatActivity {
                 setFragment(Constants.FRAGMENT_INDEX_NOT_CALIBRATED);
 
             } else if(!registered) {
-                Log.d(Constants.LOG_TAG, "!registered");
+                Log.d(LOG_TAG, "!registered");
 
                 Menu menu = navigationView.getMenu();
 
@@ -479,7 +489,7 @@ public class MainActivity extends AppCompatActivity {
                 setFragment(Constants.FRAGMENT_INDEX_NOT_CALIBRATED);
 
             } else if (registered && calibrated) {
-                Log.d(Constants.LOG_TAG, "registered && calibrated");
+                Log.d(LOG_TAG, "registered && calibrated");
 
                 Menu menu = navigationView.getMenu();
 
@@ -629,7 +639,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setFragment(String id) {
-        Log.d(Constants.LOG_TAG, "setFragment: " + id);
+        Log.d(LOG_TAG, "setFragment: " + id);
         setFragment(id, "", 0);
     }
 
@@ -686,7 +696,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setSubFragment(String id) {
-        Log.d(Constants.LOG_TAG, "setSubFragment: " + id);
+        Log.d(LOG_TAG, "setSubFragment: " + id);
         setSubFragment(id, "", 0);
     }
 
@@ -729,7 +739,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static void snackbar(String text, int length){
-        Log.d(Constants.LOG_TAG, "Inside snackbar");
+        Log.d(LOG_TAG, "Inside snackbar");
 
         Snackbar snackbar = Snackbar
                 .make(coordinatorLayout, text, length);
@@ -753,13 +763,18 @@ public class MainActivity extends AppCompatActivity {
 
         if(registered && calibrated) {
             //TODO: uncomment after tests
-            /*LocalBroadcastManager.getInstance(this).registerReceiver((receiver),
+            LocalBroadcastManager.getInstance(this).registerReceiver((receiver),
                     new IntentFilter("RESULT")
             );
 
+            //Start generate episodes
             Intent intent = new Intent(this, GenerateEpisodesService.class);
             startService(intent);
-            bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);*/
+            bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+
+            Intent intent2 = new Intent(this, UpdateWidgetService.class);
+            startService(intent2);
+            bindService(intent2, mServiceConnection2, Context.BIND_IMPORTANT);
         }
 
 
@@ -769,11 +784,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
 
         if(registered && calibrated) {
-            /*LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
             if (mServiceBound) {
                 unbindService(mServiceConnection);
+                unbindService(mServiceConnection2);
                 mServiceBound = false;
-            }*/
+            }
         }
 
         super.onStop();
@@ -791,6 +807,21 @@ public class MainActivity extends AppCompatActivity {
             GenerateEpisodesService.MyBinder myBinder = (GenerateEpisodesService.MyBinder) service;
             mGenerateEpisodesService = myBinder.getService();
             mServiceBound = true;
+        }
+    };
+
+    private ServiceConnection mServiceConnection2 = new ServiceConnection() {
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mServiceBound2 = false;
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            UpdateWidgetService.MyBinder myBinder = (UpdateWidgetService.MyBinder) service;
+            mUpdateWidgetService = myBinder.getService();
+            mServiceBound2 = true;
         }
     };
 

@@ -95,10 +95,8 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
                 AngerLevel.COLUMN_TIMESTAMP + " DESC");
 
         if (cursor != null) {
-            Log.d(Constants.LOG_TAG, "Cursor is NOT null");
             cursor.moveToFirst();
         }else {
-            Log.d(Constants.LOG_TAG, "Cursor is null");
             return null;
         }
 

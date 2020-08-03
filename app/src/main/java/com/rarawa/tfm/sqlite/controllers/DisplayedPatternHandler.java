@@ -110,7 +110,7 @@ public class DisplayedPatternHandler extends SQLiteOpenHelper {
                 DisplayedPattern.COLUMN_STATUS, Pattern.COLUMN_ID,
                 limit);
 
-        Log.d(LOG_TAG, "query:\n" + query);
+        //Log.d(LOG_TAG, "query:\n" + query);
 
         Cursor cursor = db.rawQuery(query, null);
         int count = cursor.getCount();

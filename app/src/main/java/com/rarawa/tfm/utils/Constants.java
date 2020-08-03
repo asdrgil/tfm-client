@@ -23,6 +23,7 @@ public class Constants {
 
     //Measurement every X milliseconds
     public static final int MEASUREMENT_FREQUENCY = 10*1000; //DEBUG
+    public static final int MEASUREMENT_FREQUENCY_2 = 10*1000; //DEBUG
     //Maximum time a anger level is valid (it should be MEASUREMENT_FREQUENCY, but the app can fail
     //and not measure some state. At this point, is when this value is useful
     public static final int MEASUREMENT_VALID_TIME = 20*1000;

@@ -21,7 +21,9 @@ public class GenerateEpisodesService extends Service  {
 
     @Override
     public void onCreate() {
+
         super.onCreate();
+
         broadcaster = LocalBroadcastManager.getInstance(this);
 
         //Create one episode
@@ -29,8 +31,6 @@ public class GenerateEpisodesService extends Service  {
             public void run() {
 
                 SqliteHandler db = new SqliteHandler(getBaseContext());
-
-
 
                 for(int i = 0; i < Constants.NUMBER_WEAVES; i++) {
                     generateValue(db, 0);
@@ -63,7 +63,7 @@ public class GenerateEpisodesService extends Service  {
 
         String message = String.format("%d,%d", currentAngerLevel, currentTimestamp);
 
-        Log.d(LOG_TAG, "currentAngerLevel generated: " + currentAngerLevel);
+        Log.d(LOG_TAG, "Generated: " + currentAngerLevel);
 
         Intent intent = new Intent("RESULT");
         intent.putExtra("MESSAGE", message);
