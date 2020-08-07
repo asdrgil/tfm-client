@@ -21,9 +21,9 @@ import com.rarawa.tfm.sqlite.models.ReasonAnger;
 import com.rarawa.tfm.sqlite.models.UserInfo;
 import com.rarawa.tfm.utils.Constants;
 
-import java.util.Calendar;
+import org.json.JSONObject;
+
 import java.util.HashMap;
-import java.util.Map;
 
 public class SqliteHandler extends SQLiteOpenHelper {
 
@@ -232,6 +232,10 @@ public class SqliteHandler extends SQLiteOpenHelper {
         return reasonAngerHandler.getReasonAnger(idFirstAngerLevel, this.getReadableDatabase());
     }
 
+    public JSONObject getUnsyncedReasonAnger(){
+        return reasonAngerHandler.getUnsyncedReasonAnger(this.getWritableDatabase());
+    }
+
     /* DISPLAYPATTERN METHODS */
 
     public void insertDisplayedPattern(int angerLevelId, int patternId){
@@ -252,6 +256,10 @@ public class SqliteHandler extends SQLiteOpenHelper {
     public HashMap<Integer, String> getTopUsefulPatterns(long from, long to, int limit){
         return displayedPatternHandler
                 .getTopUsefulPatterns(from, to, limit, this.getReadableDatabase());
+    }
+
+    public JSONObject getUnsyncedPatterns(){
+        return displayedPatternHandler.getUnsyncedPatterns(this.getWritableDatabase());
     }
 
     /* HISTORY METHODS */

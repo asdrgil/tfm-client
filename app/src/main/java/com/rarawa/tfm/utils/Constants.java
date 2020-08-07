@@ -29,7 +29,7 @@ public class Constants {
     public static final int MEASUREMENT_VALID_TIME = 20*1000;
     public static final int MAX_ANGER_LEVEL = 4;
     public static final int NUMBER_WEAVES = 1; //DEBUG
-    public static final int UPDATE_PATTERNS_FREQUENCY = 20*60*1000; //DEBUG
+    public static final int UPDATE_PATTERNS_FREQUENCY = 1*60*1000; //DEBUG
     //public static final int UPDATE_PATTERNS_FREQUENCY = 30*60*1000; //PROD
 
     /*Broadcast constants*/
@@ -48,6 +48,7 @@ public class Constants {
     public static final String API_BASE_URL = "https://holstein.fdi.ucm.es/termoira/api/v1/";
     public static final String SYNC_DEVICE_URL = "sincronizarDispositivo/";
     public static final String UPDATE_PATTERNS_PATIENT_URL = "actualizarPautasPaciente/";
+    public static final String UPDATE_DISPLAY_PATTERNS = "histEstadoPaciente/";
     public static final int API_TOKEN_LENGTH = 6;
 
     /* Fragments */

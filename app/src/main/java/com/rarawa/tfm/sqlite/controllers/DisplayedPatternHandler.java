@@ -7,17 +7,16 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import com.rarawa.tfm.R;
 import com.rarawa.tfm.sqlite.models.AngerLevel;
-import com.rarawa.tfm.sqlite.models.CalibrateSleep;
 import com.rarawa.tfm.sqlite.models.DisplayedPattern;
 import com.rarawa.tfm.sqlite.models.Pattern;
-import com.rarawa.tfm.sqlite.models.UserInfo;
+import com.rarawa.tfm.sqlite.models.ReasonAnger;
 import com.rarawa.tfm.utils.Constants;
 
-import java.util.AbstractMap;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.HashMap;
-import java.util.Map;
 
 import static com.rarawa.tfm.utils.Constants.LOG_TAG;
 
@@ -125,6 +124,78 @@ public class DisplayedPatternHandler extends SQLiteOpenHelper {
 
             result.put(i, String.format("%s|%d",patternStr, numberCoincidences));
         }
+
+        return result;
+
+    }
+
+    public JSONObject getUnsyncedPatterns(SQLiteDatabase db){
+
+        JSONObject result = new JSONObject();
+
+        String query = String.format("SELECT T1.%s, T1.%s, T1.%s," +
+                        "T2.%s, T2.%s " +
+                        "FROM %s T1 " +
+                        "INNER JOIN %s T2 ON T1.%s=T2.%s " +
+                        "WHERE T1.%s=0 AND T2.%s > 0 " +
+                        "ORDER BY T2.%s, T1.%s, T1.%s ASC;",
+                DisplayedPattern.COLUMN_PATTERN_ID, DisplayedPattern.COLUMN_STATUS, DisplayedPattern.COLUMN_COMMENTS,
+                AngerLevel.COLUMN_ANGER_VAL, AngerLevel.COLUMN_TIMESTAMP,
+                DisplayedPattern.TABLE_NAME,
+                AngerLevel.TABLE_NAME, AngerLevel.COLUMN_ID, DisplayedPattern.COLUMN_ID,
+                DisplayedPattern.COLUMN_SYNCED, AngerLevel.COLUMN_ANGER_VAL,
+                AngerLevel.COLUMN_TIMESTAMP, DisplayedPattern.COLUMN_ID, DisplayedPattern.COLUMN_STATUS);
+
+        Cursor cursor = db.rawQuery(query, null);
+        int count = cursor.getCount();
+
+
+
+        for(int i = 0; i < count; i++) {
+            cursor.moveToNext();
+
+            JSONObject element = new JSONObject();
+            try {
+
+                element.put("level",
+                        String.valueOf(
+                                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ANGER_VAL))));
+
+                element.put("timestamp",
+                        String.valueOf(
+                                cursor.getLong(cursor.getColumnIndex(AngerLevel.COLUMN_TIMESTAMP))));
+
+
+
+                element.put("pattern",
+                        String.valueOf(
+                                cursor.getInt(cursor.getColumnIndex(DisplayedPattern.COLUMN_PATTERN_ID))));
+
+                element.put("status",
+                        String.valueOf(
+                                cursor.getInt(cursor.getColumnIndex(DisplayedPattern.COLUMN_STATUS))));
+
+                String comment =
+                        cursor.getString(cursor.getColumnIndex(DisplayedPattern.COLUMN_COMMENTS));
+
+                if(comment.length() > 0) {
+                    element.put(DisplayedPattern.COLUMN_COMMENTS, comment);
+                }
+
+                result.put(String.valueOf(i), element);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        ContentValues values = new ContentValues();
+        values.put(DisplayedPattern.COLUMN_SYNCED, 1);
+
+        db.update(DisplayedPattern.TABLE_NAME, values, DisplayedPattern.COLUMN_SYNCED + " = ?",
+                new String[]{String.valueOf(0)});
+
+        db.close();
 
         return result;
 

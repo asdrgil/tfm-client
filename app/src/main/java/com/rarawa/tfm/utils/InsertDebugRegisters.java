@@ -137,7 +137,7 @@ public class InsertDebugRegisters {
         db.insertDisplayedPatternDebug(4, 3, -1, "");
         db.insertDisplayedPatternDebug(4, 4, 1, "");
         db.insertDisplayedPatternDebug(5, 6, 1, "");
-        db.insertDisplayedPatternDebug(6, 5, -1, "No podía hacer ejercicio");
+        db.insertDisplayedPatternDebug(6, 5, -1, "No podia hacer ejercicio");
         db.insertDisplayedPatternDebug(6, 6, 1, "");
         db.insertDisplayedPatternDebug(7, 7, 1, "");
         db.insertDisplayedPatternDebug(8, 8, -1, "");

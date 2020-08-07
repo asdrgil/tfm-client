@@ -8,22 +8,25 @@ public class ReasonAnger {
     public static final String COLUMN_ID_FIRST_ANGER_LEVEL = "idFirstAngerLevel";
     public static final String COLUMN_ID_LAST_ANGER_LEVEL = "idLastAngerLevel";
     public static final String COLUMN_REASON_ANGER = "reasonAnger";
+    public static final String COLUMN_SYNCED = "synced";
 
     private int id = 0;
     //First id of the measured episode
     private int idFirstAngerLevel = 0;
     private int idLastAngerLevel = 0;
     private int reasonAnger = 0;
+    private int synced = 0;
 
 
 
     public static final String CREATE_TABLE =
-            String.format("CREATE TABLE %s (%s %s, %s %s, %s %s, %s %s)",
+            String.format("CREATE TABLE %s (%s %s, %s %s, %s %s, %s %s, %s %s)",
                     TABLE_NAME,
                     COLUMN_ID, "INTEGER PRIMARY KEY AUTOINCREMENT",
                     COLUMN_ID_FIRST_ANGER_LEVEL, "INTEGER NOT NULL",
                     COLUMN_ID_LAST_ANGER_LEVEL, "INTEGER NOT NULL",
-                    COLUMN_REASON_ANGER, "INTEGER NOT NULL");
+                    COLUMN_REASON_ANGER, "INTEGER NOT NULL",
+                    COLUMN_SYNCED, "INTEGER NOT NULL DEFAULT 0");
 
     public ReasonAnger(){}
 
@@ -31,6 +34,7 @@ public class ReasonAnger {
         this.id = id;
         this.idFirstAngerLevel = idFirstAngerLevel;
         this.reasonAnger = reasonAnger;
+        this.synced = 0;
     }
 
     public int getId() {
@@ -63,5 +67,13 @@ public class ReasonAnger {
 
     public void setReasonAnger(int reasonAnger) {
         this.reasonAnger = reasonAnger;
+    }
+
+    public int getSynced() {
+        return synced;
+    }
+
+    public void setSynced(int synced) {
+        this.synced = synced;
     }
 }

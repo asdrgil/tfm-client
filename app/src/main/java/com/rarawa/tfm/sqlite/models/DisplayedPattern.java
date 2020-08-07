@@ -9,6 +9,7 @@ public class DisplayedPattern {
     public static final String COLUMN_PATTERN_ID = "patternId";
     public static final String COLUMN_STATUS = "status";
     public static final String COLUMN_COMMENTS = "comments";
+    public static final String COLUMN_SYNCED = "synced";
 
 
     private int id = 0;
@@ -16,6 +17,7 @@ public class DisplayedPattern {
     private int angerLevelId = 0;
     private int status = 0;
     private String comments = "";
+    private int synced = 0;
 
     //Status:
     // 0 -> Unknown
@@ -24,13 +26,14 @@ public class DisplayedPattern {
     // 1 -> Useful
 
     public static final String CREATE_TABLE =
-            String.format("CREATE TABLE %s (%s %s, %s %s, %s %s, %s %s, %s %s)",
+            String.format("CREATE TABLE %s (%s %s, %s %s, %s %s, %s %s, %s %s, %s %s)",
                     TABLE_NAME,
                     COLUMN_ID, "INTEGER PRIMARY KEY AUTOINCREMENT",
                     COLUMN_PATTERN_ID, "INTEGER NOT NULL",
                     COLUMN_ANGER_LEVEL_ID, "INTEGER NOT NULL",
                     COLUMN_STATUS, "INTEGER NOT NULL DEFAULT 0",
-                    COLUMN_COMMENTS, "TEXT");
+                    COLUMN_COMMENTS, "TEXT",
+                    COLUMN_SYNCED, "INTEGER NOT NULL DEFAULT 0");
 
     public DisplayedPattern(){}
 
@@ -40,6 +43,16 @@ public class DisplayedPattern {
         this.patternId = patternId;
         this.status = status;
         this.comments = comments;
+        this.synced = 0;
+    }
+
+    public DisplayedPattern(int id, int angerLevelId, int patternId, int status, String comments, int synced){
+        this.id = id;
+        this.angerLevelId = angerLevelId;
+        this.patternId = patternId;
+        this.status = status;
+        this.comments = comments;
+        this.synced = synced;
     }
 
     public int getId() {
@@ -82,5 +95,11 @@ public class DisplayedPattern {
         this.comments = comments;
     }
 
+    public int getSynced() {
+        return synced;
+    }
 
+    public void setSynced(int synced) {
+        this.synced = synced;
+    }
 }

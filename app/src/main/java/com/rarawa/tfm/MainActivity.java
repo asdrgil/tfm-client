@@ -59,6 +59,7 @@ import com.rarawa.tfm.sqlite.SqliteHandler;
 import com.rarawa.tfm.sqlite.models.UserInfo;
 import com.rarawa.tfm.utils.ApiRest;
 import com.rarawa.tfm.utils.Constants;
+import com.rarawa.tfm.utils.InsertDebugRegisters;
 import com.rarawa.tfm.widget.WidgetProvider;
 
 import java.util.Map;
@@ -127,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
 
         updateNavigationView();
 
-        //InsertDebugRegisters.insertRegisters(getApplicationContext());
+        InsertDebugRegisters.insertRegisters(getApplicationContext());
 
         username = findViewById(R.id.menu_username);
         //TODO: not working because username's findViewById returns null. FIX IT.
@@ -144,6 +145,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     ApiRest.callUpdatePatternsPatient(getApplicationContext());
+                    ApiRest.callUpdateDisplayPatterns(getApplicationContext());
                     handler.postDelayed(this, Constants.UPDATE_PATTERNS_FREQUENCY);
                 }
             };
@@ -768,9 +770,9 @@ public class MainActivity extends AppCompatActivity {
             );
 
             //Start generate episodes
-            Intent intent = new Intent(this, GenerateEpisodesService.class);
+            /*Intent intent = new Intent(this, GenerateEpisodesService.class);
             startService(intent);
-            bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+            bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);*/
 
             Intent intent2 = new Intent(this, UpdateWidgetService.class);
             startService(intent2);
@@ -786,7 +788,7 @@ public class MainActivity extends AppCompatActivity {
         if(registered && calibrated) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
             if (mServiceBound) {
-                unbindService(mServiceConnection);
+                //unbindService(mServiceConnection);
                 unbindService(mServiceConnection2);
                 mServiceBound = false;
             }
@@ -795,7 +797,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
     }
 
-    private ServiceConnection mServiceConnection = new ServiceConnection() {
+    /*private ServiceConnection mServiceConnection = new ServiceConnection() {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
@@ -808,7 +810,7 @@ public class MainActivity extends AppCompatActivity {
             mGenerateEpisodesService = myBinder.getService();
             mServiceBound = true;
         }
-    };
+    };*/
 
     private ServiceConnection mServiceConnection2 = new ServiceConnection() {
 
