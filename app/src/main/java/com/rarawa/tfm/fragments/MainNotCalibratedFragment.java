@@ -21,6 +21,8 @@ public class MainNotCalibratedFragment extends Fragment implements View.OnClickL
         final View rootView = inflater.inflate(R.layout.fragment_main_not_calibrated, container,
                 false);
 
+        //TODO: currently it appears as null reference (probably should be assigned from MainActivity)
+
         Button btnRegister = rootView.findViewById(R.id.btnRegister);
         Button btnCalibrate = rootView.findViewById(R.id.btnCalibrate);
         TextView textCounter = rootView.findViewById(R.id.calibrate_main);

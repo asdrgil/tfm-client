@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="100dp"
     android:gravity="bottom"
@@ -12,38 +13,59 @@
         android:scaleType="centerCrop"
         android:background="@drawable/header" />
 
-    <!--
-    <de.hdodenhof.circleimageview.CircleImageView
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/profile_image"
-        android:layout_marginLeft="40dp"
-        android:layout_marginTop="40dp"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        android:src="@drawable/user1"
-        app:civ_border_width="2dp"
-        app:civ_border_color="#FF000000"/>
-    -->
 
-    <LinearLayout
+
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="52dp"
+        android:layout_height="match_parent"
         android:layout_gravity="left|bottom"
         android:gravity="center"
-        android:orientation="vertical"
-        android:paddingBottom="8dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:orientation="vertical">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profile_image"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginLeft="15dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:src="@drawable/ic_thermometer_generic"
+            app:civ_border_color="#FF000000"
+            app:civ_border_width="2dp" />
+
+        <TextView
+            android:id="@+id/menu_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:text="Termómetro de la ira"
+            android:textColor="#D3D3D3"
+            android:shadowColor="#000000"
+            android:shadowDx="5.0"
+            android:shadowDy="5.0"
+            android:shadowRadius="1.0"
+            android:textSize="20dp"
+            app:layout_constraintLeft_toRightOf="@+id/profile_image"
+            app:layout_constraintTop_toTopOf="@+id/profile_image"/>
 
         <TextView
             android:id="@+id/menu_username"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center_vertical"
+            android:layout_marginTop="5dp"
             android:text=""
-            android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+            android:textColor="#D3D3D3"
+            android:shadowColor="#000000"
+            android:shadowDx="3.0"
+            android:shadowDy="3.0"
+            android:shadowRadius="1.0"
+            app:layout_constraintLeft_toLeftOf="@+id/menu_title"
+            app:layout_constraintRight_toRightOf="@+id/menu_title"
+            app:layout_constraintTop_toBottomOf="@+id/menu_title"/>
 
-    </LinearLayout>
+    </android.support.constraint.ConstraintLayout>
 
 </FrameLayout>

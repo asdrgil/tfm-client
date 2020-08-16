@@ -18,8 +18,12 @@ import com.rarawa.tfm.sqlite.SqliteHandler;
 import com.rarawa.tfm.sqlite.models.AngerLevel;
 import com.rarawa.tfm.sqlite.models.DisplayedPattern;
 import com.rarawa.tfm.sqlite.models.Pattern;
+import com.rarawa.tfm.sqlite.models.ReasonAnger;
 import com.rarawa.tfm.utils.Constants;
 import com.rarawa.tfm.utils.DisplayPatternUtils;
+
+import static com.rarawa.tfm.utils.Constants.LOG_TAG;
+import static com.rarawa.tfm.utils.Constants.SUBFRAGMENT_MAIN;
 
 
 public class MainFragment_3 extends Fragment implements View.OnClickListener {
@@ -57,9 +61,10 @@ public class MainFragment_3 extends Fragment implements View.OnClickListener {
 
             //Update radio button info on DB
             case R.id.btnUsefulnessPattern:
-                Log.d(Constants.LOG_TAG, "onClick btnUsefulnessPattern");
+                Log.d(LOG_TAG, "onClick btnUsefulnessPattern");
                 SqliteHandler db = new SqliteHandler(getContext());
                 AngerLevel lastAngerLevel = db.getLastAngerLevel();
+                AngerLevel penultimateAngerLevel = db.getPenultimateAngerLevel();
 
                 SharedPreferences sharedPref = getContext().getSharedPreferences(
                         Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
@@ -69,11 +74,11 @@ public class MainFragment_3 extends Fragment implements View.OnClickListener {
                 int displayAngerLevelId =
                         sharedPref.getInt(Constants.SHAREDPREFERENCES_DISPLAY_ANGERLEVEL_ID, 0);
 
-                if(!(displayAngerLevelId == 0 ||
-                        (!usefulnessPatternYes.isChecked() && !usefulnessPatternNo.isChecked()))) {
+                if(usefulnessPatternYes.isChecked() || usefulnessPatternNo.isChecked()) {
+                    usefulnessPatternNo.setError(null);
 
                     DisplayedPattern displayedPattern = new DisplayedPattern();
-                    displayedPattern.setId(currentPattern.getId());
+                    displayedPattern.setPatternId(currentPattern.getId());
                     displayedPattern.setAngerLevelId(displayAngerLevelId);
 
                     if (usefulnessPatternYes.isChecked()) {
@@ -82,34 +87,23 @@ public class MainFragment_3 extends Fragment implements View.OnClickListener {
                         displayedPattern.setStatus(-2);
                     }
 
+                    DisplayPatternUtils.setDisplayAngerLevel(getContext());
                     db.updateDisplayedPattern(displayedPattern);
 
-                    //Load new pattern
+                    //Load new pattern as it is still in an episode
                     if (lastAngerLevel.getAngerLevel() > 0) {
 
-                        //If the next anger level is the same as the current displayed one,
-                        // just rotate the patterns to be shown
-                        if(lastAngerLevel.getAngerLevel() ==
-                                DisplayPatternUtils.getDisplayAngerLevel(getContext())){
-                            DisplayPatternUtils.rotatePatterns(getContext());
-                            DisplayPatternUtils.setDisplayAngerLevel(getContext());
-
-                        //Else, generate new patterns
-                        } else {
-                            DisplayPatternUtils.setDisplayAngerLevel(getContext());
-                            DisplayPatternUtils.generateNewPattern(getContext());
-                        }
-
                         ((MainActivity) getActivity())
-                                .setSubFragment(Constants.SUBFRAGMENT_MAIN.get(2));
+                                .setSubFragment(SUBFRAGMENT_MAIN.get(2));
 
+                    //End of episode
                     } else {
 
-                        DisplayPatternUtils.setDisplayAngerLevel(getContext());
-
                         ((MainActivity) getActivity())
-                                .setSubFragment(Constants.SUBFRAGMENT_MAIN.get(0));
+                                .setSubFragment(SUBFRAGMENT_MAIN.get(0));
                     }
+                } else {
+                    usefulnessPatternNo.setError("Es necesario rellenar este campo");
                 }
 
                 break;

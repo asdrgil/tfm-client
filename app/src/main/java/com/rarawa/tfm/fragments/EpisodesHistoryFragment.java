@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.Description;
@@ -130,8 +131,8 @@ public class EpisodesHistoryFragment extends Fragment implements View.OnClickLis
 
         String regexDateFormat = "([0-9]{2})/([0-9]{2})/([0-9]{4})";
 
-        inputQueryDateLayout1.setError("");
-        inputQueryDateLayout2.setError("");
+        inputQueryDateLayout1.setError(null);
+        inputQueryDateLayout2.setError(null);
 
         if(queryDate1.length() == 0){
             Log.d(Constants.LOG_TAG, "setError");

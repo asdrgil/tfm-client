@@ -1,6 +1,5 @@
 package com.rarawa.tfm;
 
-import android.appwidget.AppWidgetManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -17,6 +16,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -56,18 +56,32 @@ import com.rarawa.tfm.fragments.RegisterFragment;
 import com.rarawa.tfm.services.GenerateEpisodesService;
 import com.rarawa.tfm.services.UpdateWidgetService;
 import com.rarawa.tfm.sqlite.SqliteHandler;
+import com.rarawa.tfm.sqlite.models.AngerLevel;
 import com.rarawa.tfm.sqlite.models.UserInfo;
 import com.rarawa.tfm.utils.ApiRest;
+import com.rarawa.tfm.utils.CalibrateMeasurements;
 import com.rarawa.tfm.utils.Constants;
 import com.rarawa.tfm.utils.InsertDebugRegisters;
-import com.rarawa.tfm.widget.WidgetProvider;
 
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
-import androidx.constraintlayout.solver.widgets.WidgetContainer;
-
+import static com.rarawa.tfm.utils.Constants.AUTOMATIC_REGISTER;
+import static com.rarawa.tfm.utils.Constants.EXECUTION_MODE;
+import static com.rarawa.tfm.utils.Constants.EXECUTION_MODE_BLE;
+import static com.rarawa.tfm.utils.Constants.EXECUTION_MODE_SIMULATE_DB;
+import static com.rarawa.tfm.utils.Constants.EXECUTION_MODE_SIMULATE_EPISODE;
 import static com.rarawa.tfm.utils.Constants.LOG_TAG;
+import static com.rarawa.tfm.utils.Constants.SENSOR_ACC;
+import static com.rarawa.tfm.utils.Constants.SENSOR_EDA;
+import static com.rarawa.tfm.utils.Constants.SENSOR_HR;
+import static com.rarawa.tfm.utils.Constants.SHAREDPREFERENCES_CALIBRATE_STATE_EXERCISE;
+import static com.rarawa.tfm.utils.Constants.SHAREDPREFERENCES_CALIBRATE_STATE_SLEEP;
+import static com.rarawa.tfm.utils.Constants.STATUS_CALIBRATED_EXERCISE;
+import static com.rarawa.tfm.utils.Constants.STATUS_CALIBRATED_SLEEP;
+import static com.rarawa.tfm.utils.Constants.STATUS_CALIBRATING_EXERCISE;
+import static com.rarawa.tfm.utils.Constants.STATUS_CALIBRATING_SLEEP;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -93,7 +107,6 @@ public class MainActivity extends AppCompatActivity {
     UpdateWidgetService mUpdateWidgetService;
     boolean mServiceBound2 = false;
 
-    private static TextView username;
     private static NavigationView navigationView;
 
 
@@ -105,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
 
         navigationView = findViewById(R.id.navigation_view);
 
-        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
+        coordinatorLayout = findViewById(R.id.coordinatorLayout);
 
         db = new SqliteHandler(this);
         registered = db.userInfoExists();
@@ -119,24 +132,40 @@ public class MainActivity extends AppCompatActivity {
 
         drawerLayout = findViewById(R.id.activity_main_layout);
 
-        //startBLEStreaming();
+        if(EXECUTION_MODE == EXECUTION_MODE_BLE) {
+            startBLEStreaming();
 
-        int calibrateSleep = db.calibrateSleepExists();
-        int calibrateExercise = db.calibrateExerciseExists();
-        calibrated = calibrateSleep + calibrateExercise == 6;
+        } else if(EXECUTION_MODE == EXECUTION_MODE_SIMULATE_DB) {
+            if(!db.userInfoExists()) {
+                InsertDebugRegisters.insertRegisters(getApplicationContext());
+            }
+
+        } else if(AUTOMATIC_REGISTER){
+            if(!db.userInfoExists()) {
+                db.updgradeDB();
+
+                InsertDebugRegisters.insertSleepCalibrate(getApplicationContext());
+                InsertDebugRegisters.insertExerciseCalibrate(getApplicationContext());
+
+                InsertDebugRegisters.insertUser(db);
+                InsertDebugRegisters.insertPatterns(db);
+            }
+        }
+
+        SharedPreferences sharedPref = getBaseContext().getSharedPreferences(
+                Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
+
+        int calibrateStateSleep = sharedPref.getInt(SHAREDPREFERENCES_CALIBRATE_STATE_SLEEP, 0);
+        int calibrateStateExercise = sharedPref.getInt(SHAREDPREFERENCES_CALIBRATE_STATE_EXERCISE, 0);
+
+        calibrated = calibrateStateSleep == STATUS_CALIBRATED_SLEEP
+                && calibrateStateExercise == STATUS_CALIBRATED_EXERCISE;
         boolean registered = db.userInfoExists();
 
         updateNavigationView();
 
-        InsertDebugRegisters.insertRegisters(getApplicationContext());
-
-        username = findViewById(R.id.menu_username);
-        //TODO: not working because username's findViewById returns null. FIX IT.
-        //setNameLiteralMenu();
-
         if(registered){
             //Get updated patterns for the patient periodically
-            //TODO: uncomment it after tests
             Handler handler = new Handler();
 
             //Review periodically if there are new pattern changes on the web that
@@ -153,8 +182,6 @@ public class MainActivity extends AppCompatActivity {
             handler.post(runnableCode);
 
             if(calibrated) {
-                SharedPreferences sharedPref = getBaseContext().getSharedPreferences(
-                        Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
 
                 int showSnackbarCalibrated =
                         sharedPref.getInt(Constants.SHAREDPREFERENCES_MESSAGE_CALIBRATED, 0);
@@ -168,69 +195,25 @@ public class MainActivity extends AppCompatActivity {
                             Snackbar.LENGTH_LONG);
                 }
 
-                //TODO: uncomment it after tests
-                receiver = new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        String message = intent.getStringExtra("MESSAGE");
-                        Log.d(LOG_TAG, "Received string: " + message);
+                if(EXECUTION_MODE == EXECUTION_MODE_SIMULATE_EPISODE) {
+                    receiver = new BroadcastReceiver() {
+                        @Override
+                        public void onReceive(Context context, Intent intent) {
+                            String message = intent.getStringExtra("MESSAGE");
+                            //Log.d(LOG_TAG, "Received string: " + message);
 
-                        String messsageArr[] = message.split(",");
-                        int currentAngerLevel = Integer.parseInt(messsageArr[0]);
+                            String messsageArr[] = message.split(",");
+                            int currentAngerLevel = Integer.parseInt(messsageArr[0]);
 
-                        updateMainSubFragment(context, currentAngerLevel);
-                        updateThermometer(findViewById(R.id.thermoIcon),
-                                findViewById(R.id.textLevel), currentAngerLevel);
-
-                        //updatePattern(context, currentAngerLevel);
-                    }
-                };
+                            updateMainSubFragment(context, currentAngerLevel);
+                            updateThermometer(db, findViewById(R.id.thermoIcon),
+                                    findViewById(R.id.textLevel), currentAngerLevel);
+                        }
+                    };
+                }
             }
         }
     }
-
-
-
-    /*private void updatePattern(Context context, int currentAngerLevel){
-        SharedPreferences sharedPref = context.getSharedPreferences(
-                Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
-        SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
-
-        if(currentAngerLevel == 0){
-            sharedPrefEditor.putString(Constants.SHAREDPREFERENCES_CURRENT_PATTERNS_ORDER, "");
-            sharedPrefEditor.apply();
-            return;
-        }
-
-        String currentPatternsUnparsed =
-                sharedPref.getString(
-                        Constants.SHAREDPREFERENCES_CURRENT_PATTERNS_ORDER, "");
-
-        //Angerlevel has not changed since the previous measurement and there are at least
-        //two patterns to rotate the patterns to be displayed
-        if(currentAngerLevel == db.getPenultimateAngerLevel().getAngerLevel()
-                && currentPatternsUnparsed.contains(",")){
-            String [] currentPatterns = currentPatternsUnparsed.split(",", 2);
-            currentPatternsUnparsed = currentPatterns[1].concat(",").concat(currentPatterns[1]);
-
-            sharedPrefEditor.putString(Constants.SHAREDPREFERENCES_CURRENT_PATTERNS_ORDER,
-                    currentPatternsUnparsed);
-
-
-        //Angerlevel has changed since the previous measurement
-        } else if(currentAngerLevel != db.getPenultimateAngerLevel().getAngerLevel()){
-            currentPatternsUnparsed =
-                    db.getRandomOrderPatternsByAngerLevel(currentAngerLevel);
-
-            sharedPrefEditor.putString(Constants.SHAREDPREFERENCES_CURRENT_PATTERNS_ORDER,
-                    currentPatternsUnparsed);
-        }
-
-        sharedPrefEditor.commit();
-
-        //TODO: ver si peta en caso de que no haya ninguna pauta para el nivel dado.
-        // Controlar este error
-    }*/
 
     //TODO: ver si es necesario este método (creo que no, que se puede llamar a fragment_main y
     //ahí ya coge los datos.
@@ -240,27 +223,30 @@ public class MainActivity extends AppCompatActivity {
 
         int mainFragmentPref = sharedPref.getInt(Constants.SHAREDPREFERENCES_FRAGMENT_MAIN, 0);
 
-        Log.d(LOG_TAG, "currentAngerLevel:" + currentAngerLevel);
-        Log.d(LOG_TAG, "mainFragmentPref:" + mainFragmentPref);
-
+        //Timestamp in seconds
         long firstTmpPlateau =
                 sharedPref.getLong(Constants.SHAREDPREFERENCES_FIRST_ZERO_LEVEL_PLATEAU, 0);
 
-        boolean isOneMinuteRest = System.currentTimeMillis() - firstTmpPlateau >=
+        boolean isOneMinuteRest = System.currentTimeMillis()/1000 - firstTmpPlateau >=
                 Constants.TIME_EPISODE_IS_OBSOLETE;
+
+        Log.d(LOG_TAG, "firstTmpPlateau: " + firstTmpPlateau);
 
         if(currentAngerLevel == 0 && firstTmpPlateau == 0){
             SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
             sharedPrefEditor.putLong(Constants.SHAREDPREFERENCES_FIRST_ZERO_LEVEL_PLATEAU,
-                    System.currentTimeMillis());
+                    System.currentTimeMillis()/1000);
             sharedPrefEditor.commit();
         }
 
         //Load mainFragment_1
         if(currentAngerLevel > 0){
-            SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
-            sharedPrefEditor.putLong(Constants.SHAREDPREFERENCES_FIRST_ZERO_LEVEL_PLATEAU, 0);
-            sharedPrefEditor.commit();
+
+            if(firstTmpPlateau > 0) {
+                SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
+                sharedPrefEditor.putLong(Constants.SHAREDPREFERENCES_FIRST_ZERO_LEVEL_PLATEAU, 0);
+                sharedPrefEditor.commit();
+            }
 
             if(mainFragmentPref == 0) {
                 Log.d(LOG_TAG, "currentAngerLevel > 0 && mainFragmentPref == 0");
@@ -282,22 +268,36 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void updateThermometer(ImageView thermoIcon, TextView thermoText, int currentAngerLevel){
+    private void updateThermometer(SqliteHandler db, ImageView thermoIcon, TextView thermoText,
+                                   int currentAngerLevel){
         Log.d(LOG_TAG, "updateThermometer");
 
         Map.Entry<Integer, String> currentEntry =
                 Constants.ANGER_LEVEL_UI_MAP.get(currentAngerLevel);
 
-        //If the thermometer is not updated, update it
+        //If the thermometer UI element is not updated, update it
         if(!currentEntry.getValue().equals(thermoText)){
 
             thermoText.setText(currentEntry.getValue());
             thermoIcon.setImageResource(currentEntry.getKey());
         }
+
+        AngerLevel lastAngerLevel = db.getLastAngerLevel();
+        AngerLevel penultimateAngerLevel = db.getPenultimateAngerLevel();
+
+        //Start of an episode
+        if(penultimateAngerLevel.getAngerLevel() == 0 && lastAngerLevel.getAngerLevel() > 0){
+            db.insertReasonAnger(lastAngerLevel.getId(), 0);
+
+        //End of an episode
+        } else if(penultimateAngerLevel.getAngerLevel() > 0 && lastAngerLevel.getAngerLevel() == 0){
+            db.updateLastReasonAnger(lastAngerLevel.getId());
+        }
+
+
     }
 
     /** BLE variables and methods **/
-
     private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(final BluetoothGatt gatt, int status, int newState) {
@@ -305,7 +305,7 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        log("connection established, discovering services");
+                        Log.d(LOG_TAG, "connection established, discovering services");
                         // Once we have connection start BLE service discovery
                         gatt.discoverServices();
                     }
@@ -325,7 +325,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         private void enableStreamingNotification(BluetoothGatt gatt) {
-            log("services discovered, enabling notifications");
+            Log.d(LOG_TAG, "services discovered, enabling notifications");
             // Get the MM service
             BluetoothGattService mmService = gatt.getService(Constants.mmServiceUUID);
             // Get the streaming characteristic
@@ -349,14 +349,47 @@ public class MainActivity extends AppCompatActivity {
             int status = payload[0] & 0xff;
             int mm = payload[1] & 0xff;
             // Instant EDA value is in payload bytes 2 and 3 in big-endian format
-            int instant = ((payload[2] & 0xff) << 8) | (payload[3] & 0xff);
+            int eda = ((payload[2] & 0xff) << 8) | (payload[3] & 0xff);
             // Acceleration in x, y and z directions
             int ax = payload[4] & 0xff;
             int ay = payload[5] & 0xff;
             int az = payload[6] & 0xff;
             // Acceleration magnitude
-            double a = Math.sqrt(ax*ax + ay*ay + az*az);
-            log("st:%02x\tmm:%d\teda:%d\ta:%.1f", status, mm, instant, a);
+            double acc = Math.sqrt(ax*ax + ay*ay + az*az);
+            Log.d(LOG_TAG, String.format("st:%02x\tmm:%d\teda:%d\ta:%.1f", status, mm, eda, acc));
+
+            SharedPreferences sharedPref = getBaseContext().getSharedPreferences(
+                    Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
+            int calibrateStateSleep = sharedPref.getInt(SHAREDPREFERENCES_CALIBRATE_STATE_SLEEP, 0);
+            int calibrateStateExercise = sharedPref.getInt(SHAREDPREFERENCES_CALIBRATE_STATE_EXERCISE, 0);
+
+            long heartRateValue = new Random().nextInt(90) + 60;
+
+            if(calibrateStateSleep == STATUS_CALIBRATING_SLEEP){
+                //Minimum ACC and HR is not required
+                //db.setMinimumMeasurementsSensor(SENSOR_ACC, (long) acc);
+                //db.setMinimumMeasurementsSensor(SENSOR_HR, (long) heartRateValue);
+                db.setMinimumMeasurementsSensor(SENSOR_EDA, (long) eda);
+
+            } else if(calibrateStateExercise == STATUS_CALIBRATING_EXERCISE){
+                db.setMaximumMeasurementsSensor(SENSOR_ACC, (long) acc);
+                db.setMaximumMeasurementsSensor(SENSOR_HR, (long) heartRateValue);
+                db.setMaximumMeasurementsSensor(SENSOR_EDA, (long) eda);
+
+            } else if (calibrateStateSleep == STATUS_CALIBRATED_SLEEP
+                    && calibrateStateExercise == STATUS_CALIBRATED_EXERCISE){
+
+                int currentAngerLevel  =
+                        CalibrateMeasurements.measurementsToRangeLevel(
+                                (long) acc, heartRateValue, eda, getBaseContext());
+
+                long currentTimestamp = System.currentTimeMillis();
+                db.insertAngerLevel(currentTimestamp, currentAngerLevel);
+
+                updateMainSubFragment(getBaseContext(), currentAngerLevel);
+                updateThermometer(db, findViewById(R.id.thermoIcon),
+                        findViewById(R.id.textLevel), currentAngerLevel);
+            }
         }
     };
 
@@ -364,13 +397,13 @@ public class MainActivity extends AppCompatActivity {
             new BluetoothAdapter.LeScanCallback() {
                 @Override
                 public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
-                    log("found ring %s, rssi: %d", device.getAddress(), rssi);
+                    Log.d(LOG_TAG, String.format("found ring %s, rssi: %d", device.getAddress(), rssi));
                     stopScanning();
                     runOnUiThread(
                             new Runnable() {
                                 @Override
                                 public void run() {
-                                    log("connecting with %s", device.getAddress());
+                                    Log.d(LOG_TAG, String.format("connecting with %s", device.getAddress()));
                                     // Establish a connection with the ring.
                                     bleGatt = device.connectGatt(MainActivity.this, false, gattCallback);
                                 }
@@ -386,7 +419,7 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 startScanning();
             } else {
-                log("bluetooth not enabled");
+                Log.d(LOG_TAG, "bluetooth not enabled");
             }
         }
     }
@@ -394,7 +427,7 @@ public class MainActivity extends AppCompatActivity {
     private void startScanning() {
         if (scanning) return;
         scanning = true;
-        log("scanning for rings");
+        Log.d(LOG_TAG, "scanning for rings");
         // Start scanning for devices that support the Moodmetric service
         bluetoothAdapter.startLeScan(new UUID[] { Constants.mmServiceUUID }, scanCallback);
     }
@@ -402,7 +435,7 @@ public class MainActivity extends AppCompatActivity {
     private void stopScanning() {
         if (!scanning) return;
         scanning = false;
-        log("scanning stopped");
+        Log.d(LOG_TAG, "scanning stopped");
         bluetoothAdapter.stopLeScan(scanCallback);
     }
 
@@ -415,28 +448,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void log(final String fmt, final Object... args) {
-        // Updates to the UI should be done from the UI thread
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(LOG_TAG, String.format(fmt + "\n", args));
-            }
-        });
-    }
-
     private void startBLEStreaming(){
         // Get the bluetooth manager from Android
         final BluetoothManager bluetoothManager =
                 (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
         if (bluetoothManager == null) {
-            log("bluetooth service not available");
+            Log.d(LOG_TAG, "bluetooth service not available");
             return;
         }
         // Get a reference to the bluetooth adapter of the device
         bluetoothAdapter = bluetoothManager.getAdapter();
         if (bluetoothAdapter == null) {
-            log("bluetooth not supported");
+            Log.d(LOG_TAG, "bluetooth not supported");
             return;
         }
         // Check that bluetooth is enabled. If not, ask the user to enable it.
@@ -454,10 +477,6 @@ public class MainActivity extends AppCompatActivity {
         if (navigationView != null) {
             setupNavigationDrawerContent(navigationView);
 
-            if(registered){
-                userInfo = db.getUserInfo();
-            }
-
             if(registered && !calibrated){
                 Log.d(LOG_TAG, "registered && !calibrated");
 
@@ -467,6 +486,7 @@ public class MainActivity extends AppCompatActivity {
                 item_summary.setEnabled(false);
 
                 MenuItem item_register = menu.findItem(R.id.item_navigation_drawer_register);
+                item_register.setTitle("Registrar dispositivo (hecho)");
                 item_register.setEnabled(false);
 
                 MenuItem item_calibrate = menu.findItem(R.id.item_navigation_drawer_calibrate);
@@ -483,9 +503,10 @@ public class MainActivity extends AppCompatActivity {
                 item_summary.setEnabled(false);
 
                 MenuItem item_register = menu.findItem(R.id.item_navigation_drawer_register);
-                item_register.setEnabled(false);
+                item_register.setEnabled(true);
 
                 MenuItem item_calibrate = menu.findItem(R.id.item_navigation_drawer_calibrate);
+                item_register.setTitle("Calibrar dispositivo (hecho)");
                 item_calibrate.setEnabled(false);
 
                 setFragment(Constants.FRAGMENT_INDEX_NOT_CALIBRATED);
@@ -499,14 +520,14 @@ public class MainActivity extends AppCompatActivity {
                 item_summary.setEnabled(true);
 
                 MenuItem item_register = menu.findItem(R.id.item_navigation_drawer_register);
+                item_register.setTitle("Registrar dispositivo (hecho)");
                 item_register.setEnabled(false);
 
                 MenuItem item_calibrate = menu.findItem(R.id.item_navigation_drawer_calibrate);
+                item_register.setTitle("Calibrar dispositivo (hecho)");
                 item_calibrate.setEnabled(false);
 
                 setFragment(Constants.FRAGMENT_MAIN);
-
-                //********
             }
         }
     }
@@ -515,6 +536,11 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        if(registered){
+            setNameLiteralMenu(findViewById(R.id.menu_username));
+        }
+
         return true;
     }
 
@@ -565,38 +591,6 @@ public class MainActivity extends AppCompatActivity {
                                 return true;
                         }
 
-                        /*switch (menuItem.getItemId()) {
-                            case R.id.item_navigation_drawer_inbox:
-                                menuItem.setChecked(true);
-                                setFragment(0);
-                                drawerLayout.closeDrawer(GravityCompat.START);
-                                return true;
-                            case R.id.item_navigation_drawer_starred:
-                                menuItem.setChecked(true);
-                                setFragment(1);
-                                drawerLayout.closeDrawer(GravityCompat.START);
-                                return true;
-                            case R.id.item_navigation_drawer_sent_mail:
-                                menuItem.setChecked(true);
-                                drawerLayout.closeDrawer(GravityCompat.START);
-                                return true;
-                            case R.id.item_navigation_drawer_drafts:
-                                menuItem.setChecked(true);
-                                drawerLayout.closeDrawer(GravityCompat.START);
-                                return true;
-                            case R.id.item_navigation_drawer_settings:
-                                menuItem.setChecked(true);
-                                Toast.makeText(MainActivity.this, "Launching " + menuItem.getTitle().toString(), Toast.LENGTH_SHORT).show();
-                                drawerLayout.closeDrawer(GravityCompat.START);
-                                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
-                                startActivity(intent);
-                                return true;
-                            case R.id.item_navigation_drawer_help_and_feedback:
-                                menuItem.setChecked(true);
-                                Toast.makeText(MainActivity.this, menuItem.getTitle().toString(), Toast.LENGTH_SHORT).show();
-                                drawerLayout.closeDrawer(GravityCompat.START);
-                                return true;
-                        }*/
                         return true;
                     }
                 });
@@ -607,9 +601,6 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        //TODO
-        //setNameLiteralMenu();
-
         //Set calibrate as enabled
         Menu menu = navigationView.getMenu();
 
@@ -618,14 +609,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public static void setNameLiteralMenu(){
+    public static void setNameLiteralMenu(TextView username){
+
         if(!db.userInfoExists()){
             return;
         }
 
-        String name = db.getUserInfo().getName();
-        String surname1 = db.getUserInfo().getSurname1();
-        String surname2 = db.getUserInfo().getSurname2();
+        UserInfo userInfo = db.getUserInfo();
+
+        String name = userInfo.getName();
+        String surname1 = userInfo.getSurname1();
+        String surname2 = userInfo.getSurname2();
 
         //Set literal of the drawable
         String literalName;
@@ -654,37 +648,46 @@ public class MainActivity extends AppCompatActivity {
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
 
+        TextView fragmentTitle = findViewById(R.id.fragmentTitle);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
+
         switch (id) {
             case Constants.FRAGMENT_MAIN:
+                fragmentTitle.setText("Página principal");
                 MainFragment mainFragment = new MainFragment();
                 fragmentTransaction.replace(R.id.fragment, mainFragment);
                 break;
             case Constants.FRAGMENT_INDEX_NOT_CALIBRATED:
+                fragmentTitle.setText("Primeros pasos");
                 MainNotCalibratedFragment mainNotCalibratedFragment =
                         new MainNotCalibratedFragment();
                 fragmentTransaction.replace(R.id.fragment, mainNotCalibratedFragment);
                 break;
             case Constants.FRAGMENT_REGISTER:
+                fragmentTitle.setText("Registrar dispositivo");
                 RegisterFragment registerFragment = new RegisterFragment();
                 fragmentTransaction.replace(R.id.fragment, registerFragment);
                 break;
             case Constants.FRAGMENT_CALIBRATE:
+                fragmentTitle.setText("Calibrar dispositivo");
                 CalibrateFragment calibrateFragment = new CalibrateFragment();
                 fragmentTransaction.replace(R.id.fragment, calibrateFragment);
                 break;
             case Constants.FRAGMENT_CALIBRATE_SLEEP:
+                fragmentTitle.setText("Calibrar durante el sueño");
                 CalibrateSleepFragment calibrateSleepFragment = new CalibrateSleepFragment();
                 fragmentTransaction.replace(R.id.fragment, calibrateSleepFragment);
                 break;
             case Constants.FRAGMENT_CALIBRATE_EXERCISE:
+                fragmentTitle.setText("Calibrar durante el ejercicio físico");
                 CalibrateExerciseFragment calibrateExerciseFragment = new CalibrateExerciseFragment();
                 fragmentTransaction.replace(R.id.fragment, calibrateExerciseFragment);
                 break;
 
             case Constants.FRAGMENT_HISTORY:
+                fragmentTitle.setText("Historial de episodios");
                 EpisodesHistoryFragment episodesHistoryFragment = new EpisodesHistoryFragment();
                 fragmentTransaction.replace(R.id.fragment, episodesHistoryFragment);
                 break;
@@ -703,11 +706,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setSubFragment(String id, String snackbar, int length) {
+
+        TextView fragmentTitle = findViewById(R.id.fragmentTitle);
+        fragmentTitle.setText("Gestión de un episodio");
+
         SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(
                 Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
 
         SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
-
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -727,6 +733,8 @@ public class MainActivity extends AppCompatActivity {
             fragmentTransaction.replace(R.id.subfragment_main, mainFragment_3);
             sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_FRAGMENT_MAIN, 3);
         } else {
+            fragmentTitle.setText("Página principal");
+
             MainFragment_0 mainFragment_0 = new MainFragment_0();
             fragmentTransaction.replace(R.id.subfragment_main, mainFragment_0);
             sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_FRAGMENT_MAIN, 0);
@@ -764,15 +772,16 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
 
         if(registered && calibrated) {
-            //TODO: uncomment after tests
             LocalBroadcastManager.getInstance(this).registerReceiver((receiver),
                     new IntentFilter("RESULT")
             );
 
             //Start generate episodes
-            /*Intent intent = new Intent(this, GenerateEpisodesService.class);
-            startService(intent);
-            bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);*/
+            if(EXECUTION_MODE == EXECUTION_MODE_SIMULATE_EPISODE) {
+                Intent intent = new Intent(this, GenerateEpisodesService.class);
+                startService(intent);
+                bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+            }
 
             Intent intent2 = new Intent(this, UpdateWidgetService.class);
             startService(intent2);
@@ -788,7 +797,9 @@ public class MainActivity extends AppCompatActivity {
         if(registered && calibrated) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
             if (mServiceBound) {
-                //unbindService(mServiceConnection);
+                if(EXECUTION_MODE == EXECUTION_MODE_SIMULATE_EPISODE) {
+                    unbindService(mServiceConnection);
+                }
                 unbindService(mServiceConnection2);
                 mServiceBound = false;
             }
@@ -797,7 +808,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
     }
 
-    /*private ServiceConnection mServiceConnection = new ServiceConnection() {
+    private ServiceConnection mServiceConnection = new ServiceConnection() {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
@@ -810,7 +821,7 @@ public class MainActivity extends AppCompatActivity {
             mGenerateEpisodesService = myBinder.getService();
             mServiceBound = true;
         }
-    };*/
+    };
 
     private ServiceConnection mServiceConnection2 = new ServiceConnection() {
 

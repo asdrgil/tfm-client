@@ -18,6 +18,7 @@ import com.rarawa.tfm.sqlite.models.AngerLevel;
 import com.rarawa.tfm.utils.Constants;
 import com.rarawa.tfm.utils.DisplayPatternUtils;
 
+import static com.rarawa.tfm.utils.Constants.LOG_TAG;
 import static com.rarawa.tfm.utils.Constants.REASON_ANGER;
 
 
@@ -82,9 +83,7 @@ public class MainFragment_1 extends Fragment implements View.OnClickListener {
                 Log.d(Constants.LOG_TAG, "onClick btnReasonAnger");
 
                 SqliteHandler db = new SqliteHandler(getContext());
-                AngerLevel lastAngerLevel = db.getLastAngerLevel();
-
-                db.insertReasonAnger(lastAngerLevel.getId(), spinnerPosition);
+                db.updateFirstReasonAnger(spinnerPosition);
 
                 ((MainActivity) getActivity()).setSubFragment(Constants.SUBFRAGMENT_MAIN.get(2));
 

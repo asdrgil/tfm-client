@@ -1,6 +1,7 @@
 package com.rarawa.tfm.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.rarawa.tfm.sqlite.SqliteHandler;
@@ -10,6 +11,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import static com.rarawa.tfm.utils.Constants.LOG_TAG;
+import static com.rarawa.tfm.utils.Constants.SHAREDPREFERENCES_CALIBRATE_STATE_EXERCISE;
+import static com.rarawa.tfm.utils.Constants.SHAREDPREFERENCES_CALIBRATE_STATE_SLEEP;
+import static com.rarawa.tfm.utils.Constants.STATUS_CALIBRATED_EXERCISE;
+import static com.rarawa.tfm.utils.Constants.STATUS_CALIBRATED_SLEEP;
+import static com.rarawa.tfm.utils.Constants.STATUS_CALIBRATING_SLEEP;
+
 public class InsertDebugRegisters {
 
     static int dayInSeconds = 86400;
@@ -18,11 +26,13 @@ public class InsertDebugRegisters {
     public static void insertRegisters(Context context){
         SqliteHandler db = new SqliteHandler(context);
 
+        Log.d(LOG_TAG, "insertDEBUGRegisters");
+
         db.updgradeDB();
 
         insertUser(db);
-        insertSleepCalibrate(db);
-        insertExerciseCalibrate(db);
+        insertSleepCalibrate(context);
+        insertExerciseCalibrate(context);
         insertPatterns(db);
 
         if(numberDays >= 1) {
@@ -56,14 +66,28 @@ public class InsertDebugRegisters {
                 "ABCDEFGHIJ");
     }
 
-    public static void insertSleepCalibrate(SqliteHandler db){
-        db.insertSleepCalibrate();
-        db.insertWakeUpDebugCalibrate();
+    public static void insertSleepCalibrate(Context context){
+        //db.insertSleepCalibrate();
+        //db.insertWakeUpDebugCalibrate();
+
+        SharedPreferences sharedPref = context.getSharedPreferences(
+                Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
+
+        sharedPrefEditor.putInt(SHAREDPREFERENCES_CALIBRATE_STATE_SLEEP, STATUS_CALIBRATED_SLEEP);
+        sharedPrefEditor.commit();
     }
 
-    public static void insertExerciseCalibrate(SqliteHandler db){
-        db.insertStartExercise();
-        db.insertEndExerciseDebug();
+    public static void insertExerciseCalibrate(Context context){
+        //db.insertStartExercise();
+        //db.insertEndExerciseDebug();
+
+        SharedPreferences sharedPref = context.getSharedPreferences(
+                Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
+
+        sharedPrefEditor.putInt(SHAREDPREFERENCES_CALIBRATE_STATE_EXERCISE, STATUS_CALIBRATED_EXERCISE);
+        sharedPrefEditor.commit();
     }
 
     public static void insertPatterns(SqliteHandler db){

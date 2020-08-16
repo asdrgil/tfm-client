@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.rarawa.tfm.sqlite.controllers.AngerLevelHandler;
+import com.rarawa.tfm.sqlite.controllers.CalibrateRingMeasurementsHandler;
 import com.rarawa.tfm.sqlite.controllers.CalibrateSleepHandler;
 import com.rarawa.tfm.sqlite.controllers.CalibrateExerciseHandler;
 import com.rarawa.tfm.sqlite.controllers.DisplayedPatternHandler;
@@ -13,6 +14,7 @@ import com.rarawa.tfm.sqlite.controllers.PatternsHandler;
 import com.rarawa.tfm.sqlite.controllers.ReasonAngerHandler;
 import com.rarawa.tfm.sqlite.controllers.UserInfoHandler;
 import com.rarawa.tfm.sqlite.models.AngerLevel;
+import com.rarawa.tfm.sqlite.models.CalibrateRingMeasurements;
 import com.rarawa.tfm.sqlite.models.CalibrateSleep;
 import com.rarawa.tfm.sqlite.models.CalibrateExercise;
 import com.rarawa.tfm.sqlite.models.DisplayedPattern;
@@ -35,6 +37,7 @@ public class SqliteHandler extends SQLiteOpenHelper {
     ReasonAngerHandler reasonAngerHandler;
     DisplayedPatternHandler displayedPatternHandler;
     HistoryHandler historyHandler;
+    CalibrateRingMeasurementsHandler calibrateRingMeasurementsHandler;
 
     public SqliteHandler(Context context) {
         super(context, Constants.SQLITE_DB_NAME, null, Constants.SQLITE_VERSION);
@@ -46,6 +49,7 @@ public class SqliteHandler extends SQLiteOpenHelper {
         reasonAngerHandler = new ReasonAngerHandler(context);
         displayedPatternHandler = new DisplayedPatternHandler(context);
         historyHandler = new HistoryHandler(context);
+        calibrateRingMeasurementsHandler = new CalibrateRingMeasurementsHandler(context);
     }
 
     public void onCreate(SQLiteDatabase db) {
@@ -56,6 +60,7 @@ public class SqliteHandler extends SQLiteOpenHelper {
         db.execSQL(AngerLevel.CREATE_TABLE);
         db.execSQL(ReasonAnger.CREATE_TABLE);
         db.execSQL(DisplayedPattern.CREATE_TABLE);
+        db.execSQL(CalibrateRingMeasurements.CREATE_TABLE);
     }
 
     @Override
@@ -67,6 +72,7 @@ public class SqliteHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + AngerLevel.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + ReasonAnger.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + DisplayedPattern.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + CalibrateRingMeasurements.TABLE_NAME);
         onCreate(db);
     }
 
@@ -228,6 +234,16 @@ public class SqliteHandler extends SQLiteOpenHelper {
                 idFirstAngerLevel, idLastAngerLevel, this.getWritableDatabase());
     }
 
+    public void updateFirstReasonAnger(int idFirstAngerLevel){
+        reasonAngerHandler.updateFirstReasonAnger(
+                idFirstAngerLevel, this.getWritableDatabase());
+    }
+
+    public void updateLastReasonAnger( int idLastAngerLevel){
+        reasonAngerHandler.updateLastReasonAnger(
+                 idLastAngerLevel, this.getWritableDatabase());
+    }
+
     public ReasonAnger getReasonAnger(int idFirstAngerLevel){
         return reasonAngerHandler.getReasonAnger(idFirstAngerLevel, this.getReadableDatabase());
     }
@@ -260,6 +276,32 @@ public class SqliteHandler extends SQLiteOpenHelper {
 
     public JSONObject getUnsyncedPatterns(){
         return displayedPatternHandler.getUnsyncedPatterns(this.getWritableDatabase());
+    }
+
+    /* CALIBRATE RING MEASUREMENTS METHODS */
+
+    public HashMap<Integer, Long> getMinimumMeasurementsSensor(int sensor){
+        return calibrateRingMeasurementsHandler.getMinimumMeasurementsSensor(sensor, this.getReadableDatabase());
+    }
+
+    public HashMap<Integer, Long> getMaximumMeasurementsSensor(int sensor){
+        return calibrateRingMeasurementsHandler.getMaximumMeasurementsSensor(sensor, this.getReadableDatabase());
+    }
+
+    public void setMinimumMeasurementsSensor(int sensor, long value){
+        calibrateRingMeasurementsHandler.setMinimumMeasurementsSensor(sensor, value, this.getWritableDatabase());
+    }
+
+    public void setMaximumMeasurementsSensor(int sensor, long value){
+        calibrateRingMeasurementsHandler.setMaximumMeasurementsSensor(sensor, value, this.getWritableDatabase());
+    }
+
+    public void deleteMinimumMeasurementsSensor(){
+        calibrateRingMeasurementsHandler.deleteMinimumMeasurementsSensor(this.getWritableDatabase());
+    }
+
+    public void deleteMaximumMeasurementsSensor(){
+        calibrateRingMeasurementsHandler.deleteMaximumMeasurementsSensor(this.getWritableDatabase());
     }
 
     /* HISTORY METHODS */

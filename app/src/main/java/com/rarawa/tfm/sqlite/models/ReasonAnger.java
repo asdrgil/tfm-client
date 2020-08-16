@@ -24,15 +24,16 @@ public class ReasonAnger {
                     TABLE_NAME,
                     COLUMN_ID, "INTEGER PRIMARY KEY AUTOINCREMENT",
                     COLUMN_ID_FIRST_ANGER_LEVEL, "INTEGER NOT NULL",
-                    COLUMN_ID_LAST_ANGER_LEVEL, "INTEGER NOT NULL",
-                    COLUMN_REASON_ANGER, "INTEGER NOT NULL",
-                    COLUMN_SYNCED, "INTEGER NOT NULL DEFAULT 0");
+                    COLUMN_ID_LAST_ANGER_LEVEL, "INTEGER",
+                    COLUMN_REASON_ANGER, "INTEGER DEFAULT 0",
+                    COLUMN_SYNCED, "INTEGER DEFAULT 0");
 
     public ReasonAnger(){}
 
-    public ReasonAnger(int id, int idFirstAngerLevel, int reasonAnger){
+    public ReasonAnger(int id, int idFirstAngerLevel, int idLastAngerLevel, int reasonAnger){
         this.id = id;
         this.idFirstAngerLevel = idFirstAngerLevel;
+        this.idLastAngerLevel = idLastAngerLevel;
         this.reasonAnger = reasonAnger;
         this.synced = 0;
     }

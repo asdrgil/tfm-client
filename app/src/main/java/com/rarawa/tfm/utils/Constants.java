@@ -22,13 +22,13 @@ public class Constants {
             UUID.fromString("00002902-0000-1000-8000-00805F9B34FB");
 
     //Measurement every X milliseconds
-    public static final int MEASUREMENT_FREQUENCY = 10*1000; //DEBUG
+    public static final int MEASUREMENT_FREQUENCY = 15*1000; //DEBUG
     public static final int MEASUREMENT_FREQUENCY_2 = 10*1000; //DEBUG
     //Maximum time a anger level is valid (it should be MEASUREMENT_FREQUENCY, but the app can fail
     //and not measure some state. At this point, is when this value is useful
-    public static final int MEASUREMENT_VALID_TIME = 20*1000;
+    public static final int MEASUREMENT_VALID_TIME = 60*60*1000;
     public static final int MAX_ANGER_LEVEL = 4;
-    public static final int NUMBER_WEAVES = 1; //DEBUG
+    public static final int NUMBER_WEAVES = 2; //DEBUG
     public static final int UPDATE_PATTERNS_FREQUENCY = 1*60*1000; //DEBUG
     //public static final int UPDATE_PATTERNS_FREQUENCY = 30*60*1000; //PROD
 
@@ -104,6 +104,9 @@ public class Constants {
     }};
 
 
+    public static final int SENSOR_ACC = 0;
+    public static final int SENSOR_HR = 1;
+    public static final int SENSOR_EDA = 1;
 
     //Sharedpreferences info
     public static final String SHAREDPREFERENCES_FILE = "spFile";
@@ -114,9 +117,40 @@ public class Constants {
     public static final String SHAREDPREFERENCES_FIRST_ZERO_LEVEL_PLATEAU = "firstZeroLevelPlateau";
     public static final String SHAREDPREFERENCES_CURRENT_PATTERNS_ORDER = "currentPatternsOrder";
 
+    public static final String SHAREDPREFERENCES_CALIBRATE_STATE_SLEEP = "calibrateStateSleep";
+    public static final int STATUS_NOT_CALIBRATING_SLEEP = 0;
+    public static final int STATUS_CALIBRATING_SLEEP = 1;
+    public static final int STATUS_CALIBRATED_SLEEP = 2;
+
+    public static final String SHAREDPREFERENCES_CALIBRATE_STATE_EXERCISE = "calibrateStateExercise";
+    public static final int STATUS_NOT_CALIBRATING_EXERCISE = 0;
+    public static final int STATUS_CALIBRATING_EXERCISE = 1;
+    public static final int STATUS_CALIBRATED_EXERCISE = 2;
+
+    public static final String SHAREDPREFERENCES_THRESHOLD_ACC = "thresholdAcc";
+    public static final String SHAREDPREFERENCES_THRESHOLD_HR = "thresholdHR";
+    public static final String SHAREDPREFERENCES_THRESHOLD_EDA_0 = "thresholdEDA0";
+    public static final String SHAREDPREFERENCES_THRESHOLD_EDA_1 = "thresholdEDA1";
+    public static final String SHAREDPREFERENCES_THRESHOLD_EDA_2 = "thresholdEDA2";
+    public static final String SHAREDPREFERENCES_THRESHOLD_EDA_3 = "thresholdEDA3";
+    public static final String SHAREDPREFERENCES_THRESHOLD_EDA_4 = "thresholdEDA4";
 
     //Inactive time before making the old episode obsolete
-    public static final int TIME_EPISODE_IS_OBSOLETE = 60*1000;
+    public static final int TIME_EPISODE_IS_OBSOLETE = 60;
 
     public static final long ONE_DAY_TIMESTAMP = 60*60*24;
+
+
+    //Execution mode of the program
+
+    public static final int EXECUTION_MODE_BLE = 0;
+    public static final int EXECUTION_MODE_SIMULATE_EPISODE = 1;
+    public static final int EXECUTION_MODE_SIMULATE_DB = 2;
+    public static final int EXECUTION_MODE_DO_NOTHING = 3;
+    public static final boolean AUTOMATIC_REGISTER = true;
+    public static final boolean AUTOMATIC_CALIBRATE = true;
+
+    public static final int EXECUTION_MODE = EXECUTION_MODE_SIMULATE_EPISODE;
+
+
 }

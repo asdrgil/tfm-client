@@ -29,6 +29,8 @@ import java.util.Map;
 import java.sql.Timestamp;
 import java.util.Date;
 
+import static com.rarawa.tfm.utils.Constants.LOG_TAG;
+
 
 public class RegisterFragment extends Fragment implements View.OnClickListener {
     TextInputLayout layoutToken;
@@ -43,10 +45,13 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
 
         db = new SqliteHandler(getContext());
         registered = db.userInfoExists();
-        View rootView = null;
+        View rootView;
 
         if(!registered) {
             rootView = inflater.inflate(R.layout.fragment_register, container, false);
+
+            TextView fragmentTitle = rootView.findViewById(R.id.fragmentTitle);
+
             editToken = rootView.findViewById(R.id.inputTokenText);
             layoutToken = rootView.findViewById(R.id.inputTokenLayout);
             btnSend = rootView.findViewById(R.id.btnSendToken);
@@ -83,8 +88,6 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
         //Avoids that the button is clicked several times before receiving the result
         btnSend.setEnabled(false);
 
-        Log.d(Constants.LOG_TAG, "onClick register");
-
         String token = editToken.getText().toString();
 
         //Invalid token length
@@ -92,21 +95,18 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
             layoutToken.setError(getResources().getText(R.string.register_token_length));
         } else {
             //HTTP GET
-
             int result = ApiRest.registerPatient(getContext(), token);
 
-            Log.d(Constants.LOG_TAG, "result: " + result);
+            Log.d(LOG_TAG, "result: " + result);
 
             //OK
             if(result > 0){
-                Log.d(Constants.LOG_TAG, "db.userInfoExists(): True");
 
                 ((MainActivity) getActivity()).setFragment(Constants.FRAGMENT_INDEX_NOT_CALIBRATED,
                         "Paciente registrado correctamente.", Snackbar.LENGTH_LONG);
 
             //ERROR
             } else {
-                Log.d(Constants.LOG_TAG, "db.userInfoExists(): False");
 
                 layoutToken.setError(getResources().getText(R.string.register_token_invalid));
                 btnSend.setEnabled(true);

@@ -26,7 +26,7 @@
         </service>
         <service
             android:name=".services.UpdateWidgetService"
-            android:label="BoundService">
+            android:label="BoundService2">
         </service>
 
         <receiver android:name="com.rarawa.tfm.widget.WidgetProvider" >

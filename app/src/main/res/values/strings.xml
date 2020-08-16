@@ -1,7 +1,5 @@
 <resources>
     <string name="app_name">Termómetro de la ira</string>
-    <string name="action_settings">Ajustes</string>
-    <string name="title_activity_settings">Ajustes</string>
 
     <string name="register_token_length">El token debe tener seis caracteres.</string>
     <string name="register_token_invalid">El token introducido no es correcto.</string>

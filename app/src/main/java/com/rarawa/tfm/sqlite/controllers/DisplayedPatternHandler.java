@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.rarawa.tfm.sqlite.models.AngerLevel;
+import com.rarawa.tfm.sqlite.models.CalibrateSleep;
 import com.rarawa.tfm.sqlite.models.DisplayedPattern;
 import com.rarawa.tfm.sqlite.models.Pattern;
 import com.rarawa.tfm.sqlite.models.ReasonAnger;
@@ -76,25 +77,24 @@ public class DisplayedPatternHandler extends SQLiteOpenHelper {
     public void updateDisplayedPattern(DisplayedPattern displayedPattern, SQLiteDatabase db){
         ContentValues values = new ContentValues();
 
-        if(displayedPattern.getStatus() > -2){
-            values.put(DisplayedPattern.COLUMN_STATUS, displayedPattern.getStatus());
-        }
+        values.put(DisplayedPattern.COLUMN_STATUS, displayedPattern.getStatus());
 
         if(displayedPattern.getComments().length() > 0){
             values.put(DisplayedPattern.COLUMN_COMMENTS, displayedPattern.getComments());
+            Log.d(LOG_TAG, "displayedPattern.getComments(): " + displayedPattern.getComments());
         }
 
-        db.update(DisplayedPattern.TABLE_NAME, values, DisplayedPattern.COLUMN_ID + " = ?",
-                new String[]{String.valueOf(displayedPattern.getId())});
+        db.update(DisplayedPattern.TABLE_NAME, values, DisplayedPattern.COLUMN_PATTERN_ID + " = ?",
+                new String[]{String.valueOf(displayedPattern.getPatternId())});
 
         db.close();
     }
 
     public HashMap<Integer, String> getTopUsefulPatterns(long from, long to, int limit, SQLiteDatabase db){
 
-        String query = String.format("SELECT T2.%s, SUM(T1.%) " +
+        String query = String.format("SELECT T2.%s, SUM(T1.%s) " +
                         "FROM %s T1 " +
-                        "INNER JOIN %s T2 ON  T1.patternId=T2.%s " +
+                        "INNER JOIN %s T2 ON  T1.%s=T2.%s " +
                         "INNER JOIN %s T3 ON  T1.%s=T3.%s " +
                         "WHERE T3.%s BETWEEN %d AND %d " +
                         "GROUP BY T1.%s " +
@@ -102,7 +102,7 @@ public class DisplayedPatternHandler extends SQLiteOpenHelper {
                         "LIMIT %d; ",
                 Pattern.COLUMN_NAME, DisplayedPattern.COLUMN_STATUS,
                 DisplayedPattern.TABLE_NAME,
-                Pattern.TABLE_NAME, DisplayedPattern.COLUMN_PATTERN_ID, Pattern.TABLE_NAME,
+                Pattern.TABLE_NAME, DisplayedPattern.COLUMN_PATTERN_ID, Pattern.COLUMN_ID,
                 AngerLevel.TABLE_NAME, DisplayedPattern.COLUMN_ANGER_LEVEL_ID, Pattern.COLUMN_ID,
                 AngerLevel.COLUMN_TIMESTAMP, from, to,
                 DisplayedPattern.COLUMN_PATTERN_ID,

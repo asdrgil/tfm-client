@@ -31,6 +31,13 @@ import com.rarawa.tfm.sqlite.SqliteHandler;
 import com.rarawa.tfm.utils.Constants;
 
 import static com.rarawa.tfm.utils.Constants.MINIMUM_EXERCISE_CALIBRATE_TIME;
+import static com.rarawa.tfm.utils.Constants.SHAREDPREFERENCES_CALIBRATE_STATE_EXERCISE;
+import static com.rarawa.tfm.utils.Constants.SHAREDPREFERENCES_CALIBRATE_STATE_SLEEP;
+import static com.rarawa.tfm.utils.Constants.STATUS_CALIBRATED_EXERCISE;
+import static com.rarawa.tfm.utils.Constants.STATUS_CALIBRATED_SLEEP;
+import static com.rarawa.tfm.utils.Constants.STATUS_CALIBRATING_EXERCISE;
+import static com.rarawa.tfm.utils.Constants.STATUS_NOT_CALIBRATING_EXERCISE;
+import static com.rarawa.tfm.utils.Constants.STATUS_NOT_CALIBRATING_SLEEP;
 
 
 public class CalibrateExerciseFragment extends Fragment implements View.OnClickListener {
@@ -62,6 +69,10 @@ public class CalibrateExerciseFragment extends Fragment implements View.OnClickL
             @Override
             public void onChronometerTick(Chronometer chronometer) {
 
+                SharedPreferences sharedPref = getContext().getSharedPreferences(
+                        Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
+                SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
+
                 //progressBar.setProgress();
 
                 long chronoTimeSeconds = (SystemClock.elapsedRealtime() - chronometer.getBase())
@@ -78,6 +89,9 @@ public class CalibrateExerciseFragment extends Fragment implements View.OnClickL
                     TextView maxTimeTxt = rootView.findViewById(R.id.maxTimeTxt);
                     maxTimeTxt.setTextColor(getResources().getColor(R.color.md_green_700));
 
+                    sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_CALIBRATE_STATE_EXERCISE,
+                            STATUS_CALIBRATED_EXERCISE);
+                    sharedPrefEditor.commit();
 
                     KeyguardManager myKM = (KeyguardManager) getContext()
                             .getSystemService(Context.KEYGUARD_SERVICE);
@@ -96,6 +110,7 @@ public class CalibrateExerciseFragment extends Fragment implements View.OnClickL
                             channel1.setImportance(NotificationManager.IMPORTANCE_HIGH);
                             channel1.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
                             channel1.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+
                             //TODO: tick sound
                             //channel1.setSound();
 
@@ -117,17 +132,15 @@ public class CalibrateExerciseFragment extends Fragment implements View.OnClickL
 
                     Log.d(Constants.LOG_TAG, "calling db.insertEndExercise()");
 
-                    db.insertEndExercise();
+                    int calibrateStateSleep = sharedPref.getInt(SHAREDPREFERENCES_CALIBRATE_STATE_SLEEP, 0);
 
-                    if(db.calibrateSleepExists() < 3) {
+                    if(calibrateStateSleep != STATUS_CALIBRATED_SLEEP) {
                         ((MainActivity) getActivity())
                                 .setFragment(Constants.FRAGMENT_CALIBRATE,
                                         getResources().getText(R.string.calibrate_exercise_info3).toString(),
                                         Snackbar.LENGTH_LONG);
                     } else {
-                        SharedPreferences sharedPref = getContext().getSharedPreferences(
-                                Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
-                        SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
+
                         sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_MESSAGE_CALIBRATED, 1);
                         sharedPrefEditor.commit();
 
@@ -145,6 +158,11 @@ public class CalibrateExerciseFragment extends Fragment implements View.OnClickL
 
     @Override
     public void onClick(final View view) {
+        SharedPreferences sharedPref = getContext().getSharedPreferences(
+                Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
+
+
         if(btnStart.getText().equals("Cancelar")){
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
             builder.setTitle("Aviso")
@@ -163,6 +181,12 @@ public class CalibrateExerciseFragment extends Fragment implements View.OnClickL
                                     Snackbar.LENGTH_SHORT);
 
                             progressBar.setProgress(0);
+
+                            sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_CALIBRATE_STATE_EXERCISE,
+                                    STATUS_NOT_CALIBRATING_EXERCISE);
+                            sharedPrefEditor.commit();
+
+                            db.deleteMaximumMeasurementsSensor();
                         }
                     })
                     .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -173,6 +197,8 @@ public class CalibrateExerciseFragment extends Fragment implements View.OnClickL
             //Creating dialog box
             AlertDialog dialog  = builder.create();
             dialog.show();
+
+        //Start calibrate
         } else {
 
             db.insertStartExercise();
@@ -180,6 +206,10 @@ public class CalibrateExerciseFragment extends Fragment implements View.OnClickL
             btnStart.setText("Cancelar");
 
             chronometer.start();
+
+            sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_CALIBRATE_STATE_EXERCISE,
+                    STATUS_CALIBRATING_EXERCISE);
+            sharedPrefEditor.commit();
         }
     }
 

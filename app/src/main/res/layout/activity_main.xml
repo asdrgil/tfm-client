@@ -13,11 +13,6 @@
         android:layout_height="match_parent">
 
         <FrameLayout
-            android:id="@+id/fragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -31,6 +26,22 @@
                 app:theme="@style/ToolbarTheme" />
 
         </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/fragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="?actionBarSize"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/fragmentTitle"
+            android:gravity="center_horizontal"
+            android:text="Título de la pantalla"
+            android:textSize="30dp"
+            android:textStyle="bold"
+            android:layout_marginTop="70dp"/>
 
         <android.support.design.widget.NavigationView
             android:id="@+id/navigation_view"

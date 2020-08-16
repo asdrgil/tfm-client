@@ -40,7 +40,7 @@ import static com.rarawa.tfm.utils.Constants.MEASUREMENT_VALID_TIME;
 import static com.rarawa.tfm.utils.Constants.REASON_ANGER;
 
 
-public class MainFragment_0 extends Fragment {
+public class MainFragment_0 extends Fragment implements View.OnClickListener {
 
     public View rootView;
     SqliteHandler db;
@@ -55,11 +55,21 @@ public class MainFragment_0 extends Fragment {
 
         setString1();
         setString2();
+        setString3();
 
-        //TODO: crashes. Fix it
-        //setString3();
+        Button btnViewHistory = rootView.findViewById(R.id.btnViewHistory);
+        btnViewHistory.setOnClickListener((View.OnClickListener) this);
 
         return rootView;
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btnViewHistory:
+                ((MainActivity) getActivity()).setFragment(Constants.FRAGMENT_HISTORY);
+                break;
+        }
     }
 
     public void setString1(){
@@ -72,49 +82,72 @@ public class MainFragment_0 extends Fragment {
             textMain0_0.setVisibility(View.GONE);
         } else {
 
-            textMain0_0.setVisibility(View.VISIBLE);
+            long plateauTime = System.currentTimeMillis()/1000 - firstTmpPlateau;
+            long days = plateauTime / (24*60*60);
+            long hours = (plateauTime-(days*24*60*60)) / 3600;
+            long minutes = (plateauTime-(days*24*60*60+hours*60*60)) / 60;
+            long seconds = plateauTime-(days*24*60*60+hours*60*60+minutes*60);
 
-            long plateauTime = System.currentTimeMillis() / 1000 - firstTmpPlateau;
-            long days = plateauTime % 24 * 3600;
-            long hours = plateauTime % 3600;
-            long minutes = plateauTime % 60;
-            long seconds = plateauTime - (days * 24 * 3600 + hours * 3600 + minutes * 60);
-
-            Log.d(LOG_TAG, "firstTmpPlateau: " + firstTmpPlateau);
+            /*Log.d(LOG_TAG, "firstTmpPlateau: " + firstTmpPlateau);
             Log.d(LOG_TAG, "plateauTime: " + plateauTime);
+            Log.d(LOG_TAG, "plateauDays: " + days);
+            Log.d(LOG_TAG, "plateauHours: " + hours);
+            Log.d(LOG_TAG, "plateauMinutes: " + minutes);
+            Log.d(LOG_TAG, "plateauSeconds: " + seconds);*/
 
             String result = "";
 
             if (days > 0) {
-                result = String.format("%d días", days);
+                result = String.format("%d día", days);
+            }
+
+            if(days > 1){
+                result += "s";
             }
 
             if (hours > 0) {
                 if (result.length() > 0) {
-                    result.concat(",");
+                    result +="y ";
                 }
 
-                result.concat(String.format(" %d", hours));
+                result += String.format("%d hora", hours);
+
+                if(hours > 1){
+                    result += "s";
+                }
             }
 
-            if (minutes > 0) {
+            /*if (minutes > 0) {
                 if (result.length() > 0) {
-                    result.concat(",");
+                    result += ", ";
                 }
 
-                result.concat(String.format(" %d", minutes));
-            }
+                result += String.format(" %d minuto", minutes);
 
-            if (seconds > 0) {
+                if(minutes > 1){
+                    result += "s";
+                }
+            }*/
+
+            /*if (seconds > 0) {
                 if (result.length() > 0) {
-                    result.concat(",");
+                    result += ", ";
                 }
 
-                result.concat(String.format(" %d", seconds));
-            }
+                result += String.format("%d segundo", seconds);
 
-            String originalText = textMain0_0.getText().toString();
-            textMain0_0.setText(originalText.replace("{0}", result));
+                if(seconds > 1){
+                    result += "s";
+                }
+            }*/
+
+            if(result.length() > 0) {
+                textMain0_0.setVisibility(View.VISIBLE);
+                String originalText = textMain0_0.getText().toString();
+                textMain0_0.setText(originalText.replace("{0}", result));
+            } else {
+                textMain0_0.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -186,7 +219,7 @@ public class MainFragment_0 extends Fragment {
         if(result.size() >= 3){
             textMain0_5.setVisibility(View.VISIBLE);
 
-            String [] res = result.get(1).split("|");
+            String [] res = result.get(2).split("|");
 
             textMain0_5.setText(res[0]);
         }

@@ -21,7 +21,7 @@ public class Pattern {
 
     public Pattern(){}
 
-    public Pattern(int id, String name, String intensity){
+    public Pattern(int id, String name, String intensities){
         this.id = id;
         this.name = name;
         this.intensities = intensities;

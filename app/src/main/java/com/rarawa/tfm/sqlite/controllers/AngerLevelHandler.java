@@ -3,12 +3,15 @@ package com.rarawa.tfm.sqlite.controllers;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.rarawa.tfm.sqlite.models.AngerLevel;
 import com.rarawa.tfm.utils.Constants;
+
+import static com.rarawa.tfm.utils.Constants.LOG_TAG;
 
 public class AngerLevelHandler extends SQLiteOpenHelper {
     public AngerLevelHandler(Context context) {
@@ -26,6 +29,8 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
     }
 
     public long insertAngerLevel(long timestamp, int angerLevel, SQLiteDatabase db){
+
+        Log.d(LOG_TAG, "-------- Inside insertAngerLevel() ------");
 
         ContentValues values = new ContentValues();
 
@@ -94,20 +99,24 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
                 null, null, null, null,
                 AngerLevel.COLUMN_TIMESTAMP + " DESC");
 
-        if (cursor != null) {
-            cursor.moveToFirst();
-        }else {
-            return null;
-        }
+        cursor.moveToFirst();
 
-        AngerLevel note = new AngerLevel(
-                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ID)),
-                cursor.getLong(cursor.getColumnIndex(AngerLevel.COLUMN_TIMESTAMP)),
-                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ANGER_VAL)));
+        AngerLevel result;
+
+        try{
+
+            result = new AngerLevel(
+                    cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ID)),
+                    cursor.getLong(cursor.getColumnIndex(AngerLevel.COLUMN_TIMESTAMP)),
+                    cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ANGER_VAL)));
+        } catch (CursorIndexOutOfBoundsException e){
+            Log.d(LOG_TAG, "CursorIndexOutOfBoundsException");
+            result = new AngerLevel(0, 0, 0);
+        }
 
         cursor.close();
 
-        return note;
+        return result;
     }
 
     public AngerLevel getPenultimateAngerLevel(SQLiteDatabase db){
@@ -117,19 +126,23 @@ public class AngerLevelHandler extends SQLiteOpenHelper {
                 null, null, null, null,
                 AngerLevel.COLUMN_TIMESTAMP + " DESC LIMIT 1,1");
 
-        if (cursor != null)
-            cursor.moveToFirst();
-        else
-            return null;
+        AngerLevel result;
 
-        AngerLevel note = new AngerLevel(
-                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ID)),
-                cursor.getLong(cursor.getColumnIndex(AngerLevel.COLUMN_TIMESTAMP)),
-                cursor.getInt(cursor.getColumnIndex(AngerLevel.COLUMN_ANGER_VAL)));
+        //TODO: if something goes wrong, probably it will be this line
+        cursor.moveToFirst();
+
+        try{
+            result = new AngerLevel(
+                    cursor.getInt(0),
+                    cursor.getLong(1),
+                    cursor.getInt(2));
+        } catch (CursorIndexOutOfBoundsException e){
+            result = new AngerLevel(0, 0, 0);
+        }
 
         cursor.close();
 
-        return note;
+        return result;
     }
 
 }

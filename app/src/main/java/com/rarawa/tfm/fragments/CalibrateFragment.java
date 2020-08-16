@@ -18,8 +18,6 @@ import com.rarawa.tfm.utils.Constants;
 
 
 public class CalibrateFragment extends Fragment implements View.OnClickListener {
-    TextInputLayout layoutToken;
-    EditText editToken;
 
     int totalCalibrate = 0;
 
@@ -46,7 +44,7 @@ public class CalibrateFragment extends Fragment implements View.OnClickListener 
             btnSleep.setOnClickListener(this);
         } else if(calibrateSleep == 3){
             btnSleep.setEnabled(false);
-            btnSleep.setText(String.format("%s (hecho)", btnSleep.getText()));
+            btnSleep.setText("Calibrar durante el sueño (hecho)");
             totalCalibrate++;
         }
 
@@ -56,7 +54,7 @@ public class CalibrateFragment extends Fragment implements View.OnClickListener 
             btnExercise.setOnClickListener(this);
         } else {
             btnExercise.setEnabled(false);
-            btnExercise.setText(String.format("%s (hecho)", btnSleep.getText()));
+            btnExercise.setText("Calibrar durante el ejercicio físico (hecho)");
             totalCalibrate++;
         }
 

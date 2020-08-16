@@ -19,6 +19,8 @@ import com.rarawa.tfm.sqlite.models.Pattern;
 import com.rarawa.tfm.utils.Constants;
 import com.rarawa.tfm.utils.DisplayPatternUtils;
 
+import static com.rarawa.tfm.utils.Constants.LOG_TAG;
+
 
 public class MainFragment_2 extends Fragment implements View.OnClickListener {
 
@@ -28,9 +30,11 @@ public class MainFragment_2 extends Fragment implements View.OnClickListener {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Log.d(LOG_TAG, "mainFragment_2");
+
         rootView = inflater.inflate(R.layout.fragment_main_2, container, false);
         patternTextView = rootView.findViewById(R.id.textPatternValue);
-        patternCommentView = rootView.findViewById(R.id.patternCommentInfo);
+        patternCommentView = rootView.findViewById(R.id.patternComment);
 
         displayNextPattern();
 
@@ -44,9 +48,7 @@ public class MainFragment_2 extends Fragment implements View.OnClickListener {
 
     public void displayNextPattern(){
 
-        Log.d(Constants.LOG_TAG, "displayNextPattern");
-
-        SqliteHandler db = new SqliteHandler(getContext());
+        Log.d(LOG_TAG, "displayNextPattern");
 
         Pattern newPattern = DisplayPatternUtils.generateNewPattern(getContext());
         String newPatternText = "No existe ninguna pauta definida. Consulta con tu terapeuta.";
@@ -62,6 +64,8 @@ public class MainFragment_2 extends Fragment implements View.OnClickListener {
             patternCommentView.setVisibility(View.GONE);
         }
 
+
+
         patternTextView.setText(newPatternText);
     }
 
@@ -74,6 +78,8 @@ public class MainFragment_2 extends Fragment implements View.OnClickListener {
                 break;
 
             case R.id.btnOkPattern:
+                Log.d(LOG_TAG, "btnOkPattern");
+
                 SqliteHandler db = new SqliteHandler(getContext());
 
                 String patternCommentValue =  patternCommentView.getText().toString().trim();
@@ -95,13 +101,13 @@ public class MainFragment_2 extends Fragment implements View.OnClickListener {
                         displayedPattern.setComments(patternCommentValue);
 
                         db.updateDisplayedPattern(displayedPattern);
-
-                        Log.d(Constants.LOG_TAG, "onClick btnNextPattern");
-                        ((MainActivity) getActivity()).setSubFragment(
-                                Constants.SUBFRAGMENT_MAIN.get(3));
-                        break;
                     }
                 }
+
+                ((MainActivity) getActivity()).setSubFragment(
+                        Constants.SUBFRAGMENT_MAIN.get(3));
+
+                break;
         }
 
     }

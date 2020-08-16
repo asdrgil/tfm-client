@@ -1,7 +1,10 @@
 package com.rarawa.tfm.fragments;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -14,11 +17,21 @@ import android.widget.TextView;
 import com.rarawa.tfm.MainActivity;
 import com.rarawa.tfm.R;
 import com.rarawa.tfm.sqlite.SqliteHandler;
+import com.rarawa.tfm.utils.CalibrateMeasurements;
 import com.rarawa.tfm.utils.Constants;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import static com.rarawa.tfm.utils.Constants.EXECUTION_MODE;
+import static com.rarawa.tfm.utils.Constants.EXECUTION_MODE_BLE;
+import static com.rarawa.tfm.utils.Constants.SHAREDPREFERENCES_CALIBRATE_STATE_EXERCISE;
+import static com.rarawa.tfm.utils.Constants.SHAREDPREFERENCES_CALIBRATE_STATE_SLEEP;
+import static com.rarawa.tfm.utils.Constants.STATUS_CALIBRATED_EXERCISE;
+import static com.rarawa.tfm.utils.Constants.STATUS_CALIBRATED_SLEEP;
+import static com.rarawa.tfm.utils.Constants.STATUS_CALIBRATING_SLEEP;
+import static com.rarawa.tfm.utils.Constants.STATUS_NOT_CALIBRATING_SLEEP;
 
 
 public class CalibrateSleepFragment extends Fragment implements View.OnClickListener {
@@ -27,36 +40,6 @@ public class CalibrateSleepFragment extends Fragment implements View.OnClickList
     SqliteHandler db;
     Button btnSleep;
     Button btnWakeUp;
-
-    //Update btns literals and texts depending on the calibration status
-    public void updateBtnTxt(){
-        int sleepCalibrateStatus = db.calibrateSleepExists();
-
-        //Neither sleep nor wakeup
-        if(sleepCalibrateStatus == 0){
-            btnSleep.setText(getResources().getText(R.string.calibrate_sleep_btn1));
-            btnWakeUp.setEnabled(false);
-            textInfo.setVisibility(View.GONE);
-
-        //Sleep calibrated. Missing: wake up.
-        } else if(db.calibrateSleepExists() == 1){
-            btnSleep.setText("Cancelar");
-            btnWakeUp.setEnabled(true);
-
-            //Get current timestamp and format it to hh:mm to show it to the user
-            long currentTimestamp = System.currentTimeMillis();
-            Date date = new Date(currentTimestamp);
-            String strTimeFormat = "HH:mm";
-            DateFormat timeFormat = new SimpleDateFormat(strTimeFormat);
-            String formattedTime= timeFormat.format(date);
-
-            String text = getResources().getText(R.string.calibrate_sleep_info3).toString()
-                    .replace("[horas]", formattedTime);
-            textInfo.setText(text);
-            textInfo.setVisibility(View.VISIBLE);
-
-        }
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -78,6 +61,39 @@ public class CalibrateSleepFragment extends Fragment implements View.OnClickList
         return rootView;
     }
 
+    //Update btns literals and texts depending on the calibration status
+    public void updateBtnTxt(){
+        SharedPreferences sharedPref = getContext().getSharedPreferences(
+                Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
+
+        int sleepCalibrateStatus = sharedPref.getInt(SHAREDPREFERENCES_CALIBRATE_STATE_SLEEP, 0);
+
+        //Neither sleep nor wakeup
+        if(sleepCalibrateStatus == STATUS_NOT_CALIBRATING_SLEEP){
+            btnSleep.setText(getResources().getText(R.string.calibrate_sleep_btn1));
+            btnWakeUp.setEnabled(false);
+            textInfo.setVisibility(View.GONE);
+
+        //Sleep calibrated. Missing: wake up.
+        } else if(db.calibrateSleepExists() == STATUS_CALIBRATING_SLEEP){
+            btnSleep.setText("Cancelar");
+            btnWakeUp.setEnabled(true);
+
+            //Get current timestamp and format it to hh:mm to show it to the user
+            long currentTimestamp = System.currentTimeMillis();
+            Date date = new Date(currentTimestamp);
+            String strTimeFormat = "HH:mm";
+            DateFormat timeFormat = new SimpleDateFormat(strTimeFormat);
+            String formattedTime= timeFormat.format(date);
+
+            String text = getResources().getText(R.string.calibrate_sleep_info3).toString()
+                    .replace("[horas]", formattedTime);
+            textInfo.setText(text);
+            textInfo.setVisibility(View.VISIBLE);
+
+        }
+    }
+
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
@@ -93,6 +109,16 @@ public class CalibrateSleepFragment extends Fragment implements View.OnClickList
                                 public void onClick(DialogInterface dialog, int which) {
                                     db.deleteCalibrateSleep();
                                     updateBtnTxt();
+
+                                    SharedPreferences sharedPref = getContext().getSharedPreferences(
+                                            Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
+                                    SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
+
+                                    sharedPrefEditor.putInt(SHAREDPREFERENCES_CALIBRATE_STATE_SLEEP,
+                                            STATUS_NOT_CALIBRATING_SLEEP);
+                                    sharedPrefEditor.commit();
+
+                                    db.deleteMinimumMeasurementsSensor();
 
                                     MainActivity.snackbar(
                                             getResources().getText(
@@ -113,8 +139,18 @@ public class CalibrateSleepFragment extends Fragment implements View.OnClickList
                     //Creating dialog box
                     AlertDialog dialog  = builder.create();
                     dialog.show();
+
+                //Start calibrating
                 } else {
                     db.insertSleepCalibrate();
+
+                    SharedPreferences sharedPref = getContext().getSharedPreferences(
+                            Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
+                    SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
+
+                    sharedPrefEditor.putInt(SHAREDPREFERENCES_CALIBRATE_STATE_SLEEP, STATUS_CALIBRATING_SLEEP);
+                    sharedPrefEditor.commit();
+
                     updateBtnTxt();
                 }
 
@@ -148,10 +184,35 @@ public class CalibrateSleepFragment extends Fragment implements View.OnClickList
 
                                 //Everything went ok
                                 } else {
-                                    ((MainActivity) getActivity()).setFragment(
-                                            Constants.FRAGMENT_CALIBRATE, getResources().getText(
-                                                    R.string.calibrate_wakeup_snackbar3).toString(),
-                                            Snackbar.LENGTH_LONG);
+
+                                    SharedPreferences sharedPref = getContext().getSharedPreferences(
+                                            Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
+                                    SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
+
+                                    sharedPrefEditor.putInt(SHAREDPREFERENCES_CALIBRATE_STATE_SLEEP,
+                                            STATUS_CALIBRATED_SLEEP);
+                                    sharedPrefEditor.commit();
+
+                                    int calibrateStateExercise = sharedPref.getInt(SHAREDPREFERENCES_CALIBRATE_STATE_EXERCISE, 0);
+
+                                    if(calibrateStateExercise != STATUS_CALIBRATED_EXERCISE) {
+                                        ((MainActivity) getActivity()).setFragment(
+                                                Constants.FRAGMENT_CALIBRATE, getResources().getText(
+                                                        R.string.calibrate_wakeup_snackbar3).toString(),
+                                                Snackbar.LENGTH_LONG);
+                                    } else {
+
+
+                                        if(EXECUTION_MODE == EXECUTION_MODE_BLE) {
+                                            CalibrateMeasurements.calibrate(getContext(), db);
+                                        }
+
+                                        sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_MESSAGE_CALIBRATED, 1);
+                                        sharedPrefEditor.commit();
+
+                                        Intent intent = new Intent(getActivity(), MainActivity.class);
+                                        startActivity(intent);
+                                    }
                                 }
                             }
                         })

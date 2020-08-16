@@ -3,6 +3,7 @@ package com.rarawa.tfm.sqlite.controllers;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -10,6 +11,7 @@ import android.util.Log;
 import com.rarawa.tfm.sqlite.models.AngerLevel;
 import com.rarawa.tfm.sqlite.models.DisplayedPattern;
 import com.rarawa.tfm.sqlite.models.ReasonAnger;
+import com.rarawa.tfm.sqlite.models.UserInfo;
 import com.rarawa.tfm.utils.Constants;
 
 import org.json.JSONException;
@@ -37,6 +39,7 @@ public class ReasonAngerHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
 
         values.put(ReasonAnger.COLUMN_ID_FIRST_ANGER_LEVEL, idFirstAngerLevel);
+        values.put(ReasonAnger.COLUMN_ID_LAST_ANGER_LEVEL, 0);
         values.put(ReasonAnger.COLUMN_REASON_ANGER, reasonAnger);
         //Insert new register
         long result = db.insert(ReasonAnger.TABLE_NAME, null, values);
@@ -74,6 +77,63 @@ public class ReasonAngerHandler extends SQLiteOpenHelper {
 
     }
 
+    public void updateFirstReasonAnger(int reasonAnger, SQLiteDatabase db){
+
+        String query = String.format("SELECT * FROM %s ORDER BY %s DESC LIMIT 1",
+                ReasonAnger.TABLE_NAME, ReasonAnger.COLUMN_ID);
+
+        Cursor cursor = db.rawQuery(query, null);
+
+        //TODO: check if this should be included (I think so)
+        cursor.moveToFirst();
+
+        ReasonAnger res = new ReasonAnger(
+                cursor.getInt(cursor.getColumnIndex(ReasonAnger.COLUMN_ID)),
+                cursor.getInt(cursor.getColumnIndex(ReasonAnger.COLUMN_ID_FIRST_ANGER_LEVEL)),
+                cursor.getInt(cursor.getColumnIndex(ReasonAnger.COLUMN_ID_LAST_ANGER_LEVEL)),
+                reasonAnger);
+
+        ContentValues values = new ContentValues();
+
+        values.put(ReasonAnger.COLUMN_ID, res.getId());
+        values.put(ReasonAnger.COLUMN_ID_FIRST_ANGER_LEVEL, res.getIdFirstAngerLevel());
+        values.put(ReasonAnger.COLUMN_ID_LAST_ANGER_LEVEL, res.getIdLastAngerLevel());
+        values.put(ReasonAnger.COLUMN_REASON_ANGER, res.getReasonAnger());
+
+
+        db.update(ReasonAnger.TABLE_NAME, values, ReasonAnger.COLUMN_ID + " = ?",
+                new String[]{String.valueOf(res.getId())});
+    }
+
+    public void updateLastReasonAnger(int idLastAngerLevel, SQLiteDatabase db){
+
+        String query = String.format("SELECT * FROM %s ORDER BY %s DESC LIMIT 1",
+                ReasonAnger.TABLE_NAME, ReasonAnger.COLUMN_ID);
+
+        Cursor cursor = db.rawQuery(query, null);
+
+        //TODO: check if this should be included (I think so)
+        cursor.moveToFirst();
+
+        ReasonAnger reasonAnger = new ReasonAnger(
+                cursor.getInt(cursor.getColumnIndex(ReasonAnger.COLUMN_ID)),
+                cursor.getInt(cursor.getColumnIndex(ReasonAnger.COLUMN_ID_FIRST_ANGER_LEVEL)),
+                idLastAngerLevel,
+                cursor.getInt(cursor.getColumnIndex(ReasonAnger.COLUMN_REASON_ANGER))
+        );
+
+        ContentValues values = new ContentValues();
+
+        values.put(ReasonAnger.COLUMN_ID, reasonAnger.getId());
+        values.put(ReasonAnger.COLUMN_ID_FIRST_ANGER_LEVEL, reasonAnger.getIdFirstAngerLevel());
+        values.put(ReasonAnger.COLUMN_ID_LAST_ANGER_LEVEL, reasonAnger.getIdLastAngerLevel());
+        values.put(ReasonAnger.COLUMN_REASON_ANGER, reasonAnger.getReasonAnger());
+
+
+        db.update(ReasonAnger.TABLE_NAME, values, ReasonAnger.COLUMN_ID + " = ?",
+                new String[]{String.valueOf(reasonAnger.getId())});
+    }
+
     public ReasonAnger getReasonAnger(int idFirstAngerLevel, SQLiteDatabase db){
         Cursor cursor = db.query(ReasonAnger.TABLE_NAME,
                 new String[]{ReasonAnger.COLUMN_ID,
@@ -92,6 +152,7 @@ public class ReasonAngerHandler extends SQLiteOpenHelper {
         ReasonAnger note = new ReasonAnger(
                 cursor.getInt(cursor.getColumnIndex(ReasonAnger.COLUMN_ID)),
                 cursor.getInt(cursor.getColumnIndex(ReasonAnger.COLUMN_ID_FIRST_ANGER_LEVEL)),
+                cursor.getInt(cursor.getColumnIndex(ReasonAnger.COLUMN_ID_LAST_ANGER_LEVEL)),
                 cursor.getInt(cursor.getColumnIndex(ReasonAnger.COLUMN_REASON_ANGER))
         );
 
@@ -126,8 +187,6 @@ public class ReasonAngerHandler extends SQLiteOpenHelper {
 
         for(int i = 0; i < count; i++) {
             cursor.moveToNext();
-
-            Log.d(LOG_TAG, "i:" + i);
 
             JSONObject element = new JSONObject();
             try {
