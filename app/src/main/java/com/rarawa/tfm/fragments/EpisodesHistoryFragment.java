@@ -37,6 +37,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import static com.rarawa.tfm.utils.Constants.ONE_DAY_TIMESTAMP;
+
 public class EpisodesHistoryFragment extends Fragment implements View.OnClickListener {
 
     public View rootView;
@@ -215,7 +217,8 @@ public class EpisodesHistoryFragment extends Fragment implements View.OnClickLis
             timestamp1 = date1.getTime()/1000;
 
             Date date2=dateFormat.parse(queryDate2);
-            timestamp2 = date2.getTime()/1000;
+            //Add one day timestamp in order to include in the query the current day
+            timestamp2 = date2.getTime()/1000 + ONE_DAY_TIMESTAMP;
         } catch (ParseException e) {
             //
         }
@@ -314,6 +317,7 @@ public class EpisodesHistoryFragment extends Fragment implements View.OnClickLis
             chart.setDrawBorders(true);
             chart.setContentDescription("Content description tryout");
             chart.setNoDataText("No se ha encontrado ningún registro");
+            chart.setNoDataTextColor(ColorTemplate.rgb("#FF0000"));
             chart.animateXY(300, 700);
             chart.invalidate(); // refresh
         }
@@ -376,7 +380,8 @@ public class EpisodesHistoryFragment extends Fragment implements View.OnClickLis
             //chart.setFitBars(true); // make the x-axis fit exactly all bars
             chart.setDrawGridBackground(false);
             chart.setDrawBorders(true);
-            chart.setContentDescription("Content description tryout");
+            chart.setNoDataText("");
+            //chart.setNoDataTextColor(ColorTemplate.rgb("#FF0000"));
             chart.animateXY(300, 700);
             chart.invalidate(); // refresh
         }
@@ -439,7 +444,8 @@ public class EpisodesHistoryFragment extends Fragment implements View.OnClickLis
             //chart.setFitBars(true); // make the x-axis fit exactly all bars
             chart.setDrawGridBackground(false);
             chart.setDrawBorders(true);
-            chart.setContentDescription("Content description tryout");
+            chart.setNoDataText("");
+            //chart.setNoDataTextColor(ColorTemplate.rgb("#FF0000"));
             chart.animateXY(300, 700);
             chart.invalidate(); // refresh
         }

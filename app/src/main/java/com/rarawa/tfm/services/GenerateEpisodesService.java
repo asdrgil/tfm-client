@@ -57,7 +57,7 @@ public class GenerateEpisodesService extends Service  {
     }
 
     private void generateValue(SqliteHandler db, int currentAngerLevel){
-        long currentTimestamp = System.currentTimeMillis();
+        long currentTimestamp = System.currentTimeMillis()/1000;
 
         long aux = db.insertAngerLevel(currentTimestamp, currentAngerLevel);
 

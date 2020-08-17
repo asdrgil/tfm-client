@@ -110,7 +110,20 @@ public class Constants {
 
     //Sharedpreferences info
     public static final String SHAREDPREFERENCES_FILE = "spFile";
-    public static final String SHAREDPREFERENCES_FRAGMENT_MAIN = "fragmentMain";
+    public static final String SHAREDPREFERENCES_FRAGMENT_DISPLAYED = "fragmentDisplayed";
+
+    public static final int SHAREDPREFERENCES_FRAGMENT_MAIN_0 = 0;
+    public static final int SHAREDPREFERENCES_FRAGMENT_MAIN_1 = 1;
+    public static final int SHAREDPREFERENCES_FRAGMENT_MAIN_2 = 2;
+    public static final int SHAREDPREFERENCES_FRAGMENT_MAIN_3 = 3;
+    public static final int SHAREDPREFERENCES_FRAGMENT_MAIN_NOT_CALIBRATED = 4;
+    public static final int SHAREDPREFERENCES_FRAGMENT_REGISTER = 5;
+    public static final int SHAREDPREFERENCES_FRAGMENT_CALIBRATE = 6;
+    public static final int SHAREDPREFERENCES_FRAGMENT_CALIBRATE_SLEEP = 7;
+    public static final int SHAREDPREFERENCES_FRAGMENT_CALIBRATE_EXERCISE = 8;
+    public static final int SHAREDPREFERENCES_FRAGMENT_HISTORY = 9;
+
+
     //ID of the anger level measurement that is being displayed on the screen
     public static final String SHAREDPREFERENCES_DISPLAY_ANGERLEVEL_ID = "displayAngerLevelId";
     public static final String SHAREDPREFERENCES_MESSAGE_CALIBRATED = "messageCalibrated";

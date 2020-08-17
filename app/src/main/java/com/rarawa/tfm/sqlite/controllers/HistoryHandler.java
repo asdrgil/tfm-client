@@ -43,11 +43,13 @@ public class HistoryHandler extends SQLiteOpenHelper {
                 AngerLevel.COLUMN_TIMESTAMP, from, to,
                 AngerLevel.COLUMN_TIMESTAMP);
 
-        //Log.d(LOG_TAG, "query:\n" + query);
+        Log.d(LOG_TAG, "query:\n" + query);
 
         Cursor cursor = db.rawQuery(query, null);
 
         int count = cursor.getCount();
+
+        Log.d(LOG_TAG, "getNumberEpisodesPerDay.count():\n" + count);
 
         HashMap<Long, Integer> result = new HashMap<>();
 

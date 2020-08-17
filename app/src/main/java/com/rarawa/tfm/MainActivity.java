@@ -16,7 +16,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -78,6 +77,16 @@ import static com.rarawa.tfm.utils.Constants.SENSOR_EDA;
 import static com.rarawa.tfm.utils.Constants.SENSOR_HR;
 import static com.rarawa.tfm.utils.Constants.SHAREDPREFERENCES_CALIBRATE_STATE_EXERCISE;
 import static com.rarawa.tfm.utils.Constants.SHAREDPREFERENCES_CALIBRATE_STATE_SLEEP;
+import static com.rarawa.tfm.utils.Constants.SHAREDPREFERENCES_FRAGMENT_CALIBRATE;
+import static com.rarawa.tfm.utils.Constants.SHAREDPREFERENCES_FRAGMENT_CALIBRATE_EXERCISE;
+import static com.rarawa.tfm.utils.Constants.SHAREDPREFERENCES_FRAGMENT_CALIBRATE_SLEEP;
+import static com.rarawa.tfm.utils.Constants.SHAREDPREFERENCES_FRAGMENT_HISTORY;
+import static com.rarawa.tfm.utils.Constants.SHAREDPREFERENCES_FRAGMENT_MAIN_0;
+import static com.rarawa.tfm.utils.Constants.SHAREDPREFERENCES_FRAGMENT_MAIN_1;
+import static com.rarawa.tfm.utils.Constants.SHAREDPREFERENCES_FRAGMENT_MAIN_2;
+import static com.rarawa.tfm.utils.Constants.SHAREDPREFERENCES_FRAGMENT_MAIN_3;
+import static com.rarawa.tfm.utils.Constants.SHAREDPREFERENCES_FRAGMENT_MAIN_NOT_CALIBRATED;
+import static com.rarawa.tfm.utils.Constants.SHAREDPREFERENCES_FRAGMENT_REGISTER;
 import static com.rarawa.tfm.utils.Constants.STATUS_CALIBRATED_EXERCISE;
 import static com.rarawa.tfm.utils.Constants.STATUS_CALIBRATED_SLEEP;
 import static com.rarawa.tfm.utils.Constants.STATUS_CALIBRATING_EXERCISE;
@@ -206,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
                             int currentAngerLevel = Integer.parseInt(messsageArr[0]);
 
                             updateMainSubFragment(context, currentAngerLevel);
-                            updateThermometer(db, findViewById(R.id.thermoIcon),
+                            updateThermometer(getApplicationContext(), findViewById(R.id.thermoIcon),
                                     findViewById(R.id.textLevel), currentAngerLevel);
                         }
                     };
@@ -215,13 +224,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    //TODO: ver si es necesario este método (creo que no, que se puede llamar a fragment_main y
-    //ahí ya coge los datos.
     private void updateMainSubFragment(Context context, int currentAngerLevel){
         SharedPreferences sharedPref = context.getSharedPreferences(
                 Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
 
-        int mainFragmentPref = sharedPref.getInt(Constants.SHAREDPREFERENCES_FRAGMENT_MAIN, 0);
+        int mainFragmentPref = sharedPref.getInt(Constants.SHAREDPREFERENCES_FRAGMENT_DISPLAYED, 0);
 
         //Timestamp in seconds
         long firstTmpPlateau =
@@ -256,7 +263,9 @@ public class MainActivity extends AppCompatActivity {
         //If there has been a whole minute without an episode and the user has not finished
         //interacting with the previous episode => Discard the episode and upload the main fragment
         //used for the case when there are no episodes.
-        } else if (mainFragmentPref > 0 && isOneMinuteRest){
+        } else if (mainFragmentPref > SHAREDPREFERENCES_FRAGMENT_MAIN_0 &&
+                mainFragmentPref <= SHAREDPREFERENCES_FRAGMENT_MAIN_3
+                && isOneMinuteRest){
             Log.d(LOG_TAG, "isOneMinuteRest clause");
 
             SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
@@ -268,29 +277,43 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void updateThermometer(SqliteHandler db, ImageView thermoIcon, TextView thermoText,
+    private void updateThermometer(Context context, ImageView thermoIcon, TextView thermoText,
                                    int currentAngerLevel){
-        Log.d(LOG_TAG, "updateThermometer");
 
-        Map.Entry<Integer, String> currentEntry =
-                Constants.ANGER_LEVEL_UI_MAP.get(currentAngerLevel);
+        SharedPreferences sharedPref = context.getSharedPreferences(
+                Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
 
-        //If the thermometer UI element is not updated, update it
-        if(!currentEntry.getValue().equals(thermoText)){
+        int mainFragmentPref = sharedPref.getInt(Constants.SHAREDPREFERENCES_FRAGMENT_DISPLAYED,
+                -1);
 
-            thermoText.setText(currentEntry.getValue());
-            thermoIcon.setImageResource(currentEntry.getKey());
+        Log.d(LOG_TAG, "mainFragmentPref value: " + mainFragmentPref);
+
+        //Update the thermometer icon and text only if it is a mainFragment screen
+        if(mainFragmentPref >= SHAREDPREFERENCES_FRAGMENT_MAIN_0 &&
+                mainFragmentPref <= SHAREDPREFERENCES_FRAGMENT_MAIN_3) {
+
+            Log.d(LOG_TAG, "updateThermometer");
+
+            Map.Entry<Integer, String> currentEntry =
+                    Constants.ANGER_LEVEL_UI_MAP.get(currentAngerLevel);
+
+            //If the thermometer UI element is not updated, update it
+            if (!currentEntry.getValue().equals(thermoText)) {
+
+                thermoText.setText(currentEntry.getValue());
+                thermoIcon.setImageResource(currentEntry.getKey());
+            }
         }
 
         AngerLevel lastAngerLevel = db.getLastAngerLevel();
         AngerLevel penultimateAngerLevel = db.getPenultimateAngerLevel();
 
         //Start of an episode
-        if(penultimateAngerLevel.getAngerLevel() == 0 && lastAngerLevel.getAngerLevel() > 0){
+        if (penultimateAngerLevel.getAngerLevel() == 0 && lastAngerLevel.getAngerLevel() > 0) {
             db.insertReasonAnger(lastAngerLevel.getId(), 0);
 
-        //End of an episode
-        } else if(penultimateAngerLevel.getAngerLevel() > 0 && lastAngerLevel.getAngerLevel() == 0){
+            //End of an episode
+        } else if (penultimateAngerLevel.getAngerLevel() > 0 && lastAngerLevel.getAngerLevel() == 0) {
             db.updateLastReasonAnger(lastAngerLevel.getId());
         }
 
@@ -383,11 +406,11 @@ public class MainActivity extends AppCompatActivity {
                         CalibrateMeasurements.measurementsToRangeLevel(
                                 (long) acc, heartRateValue, eda, getBaseContext());
 
-                long currentTimestamp = System.currentTimeMillis();
+                long currentTimestamp = System.currentTimeMillis()/1000;
                 db.insertAngerLevel(currentTimestamp, currentAngerLevel);
 
                 updateMainSubFragment(getBaseContext(), currentAngerLevel);
-                updateThermometer(db, findViewById(R.id.thermoIcon),
+                updateThermometer(getApplicationContext(), findViewById(R.id.thermoIcon),
                         findViewById(R.id.textLevel), currentAngerLevel);
             }
         }
@@ -477,57 +500,32 @@ public class MainActivity extends AppCompatActivity {
         if (navigationView != null) {
             setupNavigationDrawerContent(navigationView);
 
-            if(registered && !calibrated){
-                Log.d(LOG_TAG, "registered && !calibrated");
+            Menu menu = navigationView.getMenu();
+            MenuItem item_register = menu.findItem(R.id.item_navigation_drawer_register);
+            MenuItem item_calibrate = menu.findItem(R.id.item_navigation_drawer_calibrate);
 
-                Menu menu = navigationView.getMenu();
-
-                MenuItem item_summary = menu.findItem(R.id.item_navigation_drawer_summary);
-                item_summary.setEnabled(false);
-
-                MenuItem item_register = menu.findItem(R.id.item_navigation_drawer_register);
-                item_register.setTitle("Registrar dispositivo (hecho)");
+            if(registered){
                 item_register.setEnabled(false);
+                item_register.setTitle("Registrar dispositivo (hecho)");
 
-                MenuItem item_calibrate = menu.findItem(R.id.item_navigation_drawer_calibrate);
-                item_calibrate.setEnabled(true);
-
-                setFragment(Constants.FRAGMENT_INDEX_NOT_CALIBRATED);
-
-            } else if(!registered) {
-                Log.d(LOG_TAG, "!registered");
-
-                Menu menu = navigationView.getMenu();
-
-                MenuItem item_summary = menu.findItem(R.id.item_navigation_drawer_summary);
-                item_summary.setEnabled(false);
-
-                MenuItem item_register = menu.findItem(R.id.item_navigation_drawer_register);
+            } else {
                 item_register.setEnabled(true);
+                item_register.setTitle("Registrar dispositivo");
+            }
 
-                MenuItem item_calibrate = menu.findItem(R.id.item_navigation_drawer_calibrate);
-                item_register.setTitle("Calibrar dispositivo (hecho)");
+            if(calibrated){
                 item_calibrate.setEnabled(false);
+                item_calibrate.setTitle("Calibrar dispositivo (hecho)");
 
-                setFragment(Constants.FRAGMENT_INDEX_NOT_CALIBRATED);
+            } else {
+                item_calibrate.setEnabled(true);
+                item_calibrate.setTitle("Calibrar dispositivo");
+            }
 
-            } else if (registered && calibrated) {
-                Log.d(LOG_TAG, "registered && calibrated");
-
-                Menu menu = navigationView.getMenu();
-
-                MenuItem item_summary = menu.findItem(R.id.item_navigation_drawer_summary);
-                item_summary.setEnabled(true);
-
-                MenuItem item_register = menu.findItem(R.id.item_navigation_drawer_register);
-                item_register.setTitle("Registrar dispositivo (hecho)");
-                item_register.setEnabled(false);
-
-                MenuItem item_calibrate = menu.findItem(R.id.item_navigation_drawer_calibrate);
-                item_register.setTitle("Calibrar dispositivo (hecho)");
-                item_calibrate.setEnabled(false);
-
+            if(registered && calibrated){
                 setFragment(Constants.FRAGMENT_MAIN);
+            } else {
+                setFragment(Constants.FRAGMENT_INDEX_NOT_CALIBRATED);
             }
         }
     }
@@ -643,10 +641,16 @@ public class MainActivity extends AppCompatActivity {
         //Hide keyboard before loading the next fragment so that if a snackbar is being
         //displayed, it can be correctly seeing. In general, this improves a bit the UX
         View view = this.getCurrentFocus();
+
         if (view != null) {
             InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+
+        SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(
+                Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
 
         TextView fragmentTitle = findViewById(R.id.fragmentTitle);
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -660,39 +664,59 @@ public class MainActivity extends AppCompatActivity {
                 fragmentTransaction.replace(R.id.fragment, mainFragment);
                 break;
             case Constants.FRAGMENT_INDEX_NOT_CALIBRATED:
+                sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_FRAGMENT_DISPLAYED,
+                        SHAREDPREFERENCES_FRAGMENT_MAIN_NOT_CALIBRATED);
+
                 fragmentTitle.setText("Primeros pasos");
                 MainNotCalibratedFragment mainNotCalibratedFragment =
                         new MainNotCalibratedFragment();
+
                 fragmentTransaction.replace(R.id.fragment, mainNotCalibratedFragment);
                 break;
             case Constants.FRAGMENT_REGISTER:
+                sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_FRAGMENT_DISPLAYED,
+                        SHAREDPREFERENCES_FRAGMENT_REGISTER);
+
                 fragmentTitle.setText("Registrar dispositivo");
                 RegisterFragment registerFragment = new RegisterFragment();
                 fragmentTransaction.replace(R.id.fragment, registerFragment);
                 break;
             case Constants.FRAGMENT_CALIBRATE:
+                sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_FRAGMENT_DISPLAYED,
+                        SHAREDPREFERENCES_FRAGMENT_CALIBRATE);
+
                 fragmentTitle.setText("Calibrar dispositivo");
                 CalibrateFragment calibrateFragment = new CalibrateFragment();
                 fragmentTransaction.replace(R.id.fragment, calibrateFragment);
                 break;
             case Constants.FRAGMENT_CALIBRATE_SLEEP:
+                sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_FRAGMENT_DISPLAYED,
+                        SHAREDPREFERENCES_FRAGMENT_CALIBRATE_SLEEP);
+
                 fragmentTitle.setText("Calibrar durante el sueño");
                 CalibrateSleepFragment calibrateSleepFragment = new CalibrateSleepFragment();
                 fragmentTransaction.replace(R.id.fragment, calibrateSleepFragment);
                 break;
             case Constants.FRAGMENT_CALIBRATE_EXERCISE:
+                sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_FRAGMENT_DISPLAYED,
+                        SHAREDPREFERENCES_FRAGMENT_CALIBRATE_EXERCISE);
+
                 fragmentTitle.setText("Calibrar durante el ejercicio físico");
                 CalibrateExerciseFragment calibrateExerciseFragment = new CalibrateExerciseFragment();
                 fragmentTransaction.replace(R.id.fragment, calibrateExerciseFragment);
                 break;
 
             case Constants.FRAGMENT_HISTORY:
+                sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_FRAGMENT_DISPLAYED,
+                        SHAREDPREFERENCES_FRAGMENT_HISTORY);
+
                 fragmentTitle.setText("Historial de episodios");
                 EpisodesHistoryFragment episodesHistoryFragment = new EpisodesHistoryFragment();
                 fragmentTransaction.replace(R.id.fragment, episodesHistoryFragment);
                 break;
         }
 
+        sharedPrefEditor.commit();
         fragmentTransaction.commit();
 
         if(snackbar.length() > 0){
@@ -721,23 +745,27 @@ public class MainActivity extends AppCompatActivity {
         if(id == Constants.SUBFRAGMENT_MAIN.get(1)){
             MainFragment_1 mainFragment_1 = new MainFragment_1();
             fragmentTransaction.replace(R.id.subfragment_main, mainFragment_1);
-            sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_FRAGMENT_MAIN, 1);
+            sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_FRAGMENT_DISPLAYED,
+                    SHAREDPREFERENCES_FRAGMENT_MAIN_1);
 
         } else if(id == Constants.SUBFRAGMENT_MAIN.get(2)){
             MainFragment_2 mainFragment_2 = new MainFragment_2();
             fragmentTransaction.replace(R.id.subfragment_main, mainFragment_2);
-            sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_FRAGMENT_MAIN, 2);
+            sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_FRAGMENT_DISPLAYED,
+                    SHAREDPREFERENCES_FRAGMENT_MAIN_2);
 
         } else if(id == Constants.SUBFRAGMENT_MAIN.get(3)){
             MainFragment_3 mainFragment_3 = new MainFragment_3();
             fragmentTransaction.replace(R.id.subfragment_main, mainFragment_3);
-            sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_FRAGMENT_MAIN, 3);
+            sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_FRAGMENT_DISPLAYED,
+                    SHAREDPREFERENCES_FRAGMENT_MAIN_3);
         } else {
             fragmentTitle.setText("Página principal");
 
             MainFragment_0 mainFragment_0 = new MainFragment_0();
             fragmentTransaction.replace(R.id.subfragment_main, mainFragment_0);
-            sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_FRAGMENT_MAIN, 0);
+            sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_FRAGMENT_DISPLAYED,
+                    SHAREDPREFERENCES_FRAGMENT_MAIN_0);
         }
 
         sharedPrefEditor.commit();
