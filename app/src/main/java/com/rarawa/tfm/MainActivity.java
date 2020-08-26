@@ -503,6 +503,7 @@ public class MainActivity extends AppCompatActivity {
             Menu menu = navigationView.getMenu();
             MenuItem item_register = menu.findItem(R.id.item_navigation_drawer_register);
             MenuItem item_calibrate = menu.findItem(R.id.item_navigation_drawer_calibrate);
+            MenuItem item_summary = menu.findItem(R.id.item_navigation_drawer_summary);
 
             if(registered){
                 item_register.setEnabled(false);
@@ -510,6 +511,7 @@ public class MainActivity extends AppCompatActivity {
 
             } else {
                 item_register.setEnabled(true);
+                //item_calibrate.setEnabled(false); //DEBUG (uncomment later)
                 item_register.setTitle("Registrar dispositivo");
             }
 
@@ -518,7 +520,7 @@ public class MainActivity extends AppCompatActivity {
                 item_calibrate.setTitle("Calibrar dispositivo (hecho)");
 
             } else {
-                item_calibrate.setEnabled(true);
+                item_summary.setEnabled(false);
                 item_calibrate.setTitle("Calibrar dispositivo");
             }
 

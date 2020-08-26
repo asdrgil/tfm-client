@@ -25,9 +25,20 @@
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="50dp"/>
 
+        <Button
+            android:id="@+id/btnPrevPattern"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:background="@drawable/ic_arrow_left"
+            android:layout_marginRight="10dp"
+            app:layout_constraintTop_toTopOf="@+id/textPatternInfo"
+            app:layout_constraintBottom_toBottomOf="@+id/textPatternValue"
+            app:layout_constraintEnd_toStartOf="@+id/textPatternValue"
+            android:layout_marginTop="30dp"/>
+
         <TextView
             android:id="@+id/textPatternValue"
-            android:layout_width="300dp"
+            android:layout_width="230dp"
             android:layout_height="100dp"
             android:ems="10"
             android:gravity="center"
@@ -43,6 +54,17 @@
             app:layout_constraintEnd_toEndOf="@+id/textPatternInfo"
             android:background="@layout/border"
             android:layout_marginTop="15dp"/>
+
+        <Button
+            android:id="@+id/btnNextPattern"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:background="@drawable/ic_arrow_right"
+            android:layout_marginLeft="10dp"
+            app:layout_constraintTop_toTopOf="@+id/textPatternInfo"
+            app:layout_constraintBottom_toBottomOf="@+id/textPatternValue"
+            app:layout_constraintStart_toEndOf="@+id/textPatternValue"
+            android:layout_marginTop="30dp"/>
 
         <TextView
             android:id="@+id/patternCommentInfo"
@@ -77,23 +99,27 @@
             android:layout_marginTop="15dp"/>
 
         <Button
-            android:id="@+id/btnNextPattern"
+            android:id="@+id/btnSaveComment"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
-            android:text="Ver otra pauta"
-            android:layout_marginLeft="2dp"
-            app:layout_constraintTop_toBottomOf="@+id/patternComment"
+            android:text="Guardar comentario"
+            android:enabled="false"
+
             app:layout_constraintStart_toStartOf="@+id/patternComment"
+            app:layout_constraintEnd_toStartOf="@+id/btnOkPattern"
+            app:layout_constraintTop_toBottomOf="@+id/patternComment"
+
             android:layout_marginTop="30dp"/>
 
         <Button
             android:id="@+id/btnOkPattern"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
-            android:text="Pauta aplicada"
-            android:layout_marginLeft="2dp"
-            app:layout_constraintStart_toEndOf="@+id/btnNextPattern"
+            android:text="Pauta&#10;aplicada"
+
+            app:layout_constraintStart_toEndOf="@+id/btnSaveComment"
             app:layout_constraintTop_toBottomOf="@+id/patternComment"
+
             android:layout_marginTop="30dp"/>
 
 

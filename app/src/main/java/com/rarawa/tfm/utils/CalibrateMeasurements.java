@@ -94,7 +94,7 @@ public class CalibrateMeasurements {
         long accThreshold = sharedPref.getLong(SHAREDPREFERENCES_THRESHOLD_ACC, 0);
         long hrThreshold = sharedPref.getLong(SHAREDPREFERENCES_THRESHOLD_HR, 0);
 
-        boolean accCriteria =  acc > accThreshold;
+        boolean accCriteria =  acc < accThreshold;
         boolean hrCriteria =  hr > hrThreshold;
 
         if(!accCriteria || !hrCriteria){

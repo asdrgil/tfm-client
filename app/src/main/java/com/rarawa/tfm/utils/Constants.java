@@ -72,8 +72,8 @@ public class Constants {
     /* Calibrate sleep */
     //public static final long MINIMUM_SLEEP_CALIBRATE_TIME = 60*60*2*1000; //PROD
     public static final long MINIMUM_SLEEP_CALIBRATE_TIME = 60*1000; //DEBUG
-    //public static final long MINIMUM_EXERCISE_CALIBRATE_TIME = 60*15*1000;
-    public static final long MINIMUM_EXERCISE_CALIBRATE_TIME = 25*1000; //DEBUG
+    public static final long MINIMUM_EXERCISE_CALIBRATE_TIME = 60*15*1000;
+    //public static final long MINIMUM_EXERCISE_CALIBRATE_TIME = 25*1000; //DEBUG
 
     /* Main */
     public static final long CALIBRATE_FREQUENCY = 10*60*1000;
@@ -165,5 +165,7 @@ public class Constants {
 
     public static final int EXECUTION_MODE = EXECUTION_MODE_SIMULATE_EPISODE;
 
+    public static final int DIRECTION_LEFT = 0;
+    public static final int DIRECTION_RIGHT = 1;
 
 }

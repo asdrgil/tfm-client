@@ -87,7 +87,7 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:gravity="center_horizontal"
-            android:text="@string/calibrate_sleep_info2"
+            android:text="@string/calibrate_exercise_info2"
             android:textSize="16dp"
             android:textAlignment="center"
             app:layout_constraintEnd_toEndOf="@+id/btnStartExercise"

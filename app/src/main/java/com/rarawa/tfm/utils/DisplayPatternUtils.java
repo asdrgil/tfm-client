@@ -2,12 +2,12 @@ package com.rarawa.tfm.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.rarawa.tfm.sqlite.SqliteHandler;
 import com.rarawa.tfm.sqlite.models.Pattern;
 
-import static com.rarawa.tfm.utils.Constants.LOG_TAG;
+import static com.rarawa.tfm.utils.Constants.DIRECTION_LEFT;
+import static com.rarawa.tfm.utils.Constants.DIRECTION_RIGHT;
 import static com.rarawa.tfm.utils.Constants.SHAREDPREFERENCES_CURRENT_PATTERNS_ORDER;
 import static com.rarawa.tfm.utils.Constants.SHAREDPREFERENCES_FILE;
 
@@ -35,7 +35,7 @@ public class DisplayPatternUtils {
     }
 
     //Generate new pattern for the given anger being displayed and return it
-    public static Pattern generateNewPattern(Context context){
+    public static Pattern generateNewPattern(Context context, int rotateDirection){
         SqliteHandler db = new SqliteHandler(context);
 
         SharedPreferences sharedPref = context.getSharedPreferences(
@@ -51,7 +51,7 @@ public class DisplayPatternUtils {
         // are loaded patterns => Rotate the patterns
         if(displayAngerLevel == db.getPenultimateAngerLevel().getAngerLevel() &&
                 currentPatternsUnparsed.length() > 0){
-            return rotatePatterns(context);
+            return rotatePatterns(context, rotateDirection);
 
         //If the displayed anger level is different from the previous anger level
         //Or there are no loaded patterns
@@ -82,7 +82,7 @@ public class DisplayPatternUtils {
 
     }
 
-    public static Pattern rotatePatterns(Context context){
+    public static Pattern rotatePatterns(Context context, int direction){
         SqliteHandler db = new SqliteHandler(context);
 
         SharedPreferences sharedPref = context.getSharedPreferences(
@@ -93,7 +93,17 @@ public class DisplayPatternUtils {
                 sharedPref.getString(SHAREDPREFERENCES_CURRENT_PATTERNS_ORDER, "");
 
         if(currentPatternsUnparsed.contains(",")){
-            String [] currentPatterns = currentPatternsUnparsed.split(",", 2);
+
+            String [] currentPatterns = new String[2];
+
+            if(direction == DIRECTION_LEFT) {
+                int index = currentPatternsUnparsed.lastIndexOf(",");
+                currentPatterns = new String[]{currentPatternsUnparsed.substring(0, index),
+                        currentPatternsUnparsed.substring(index + 1)};
+            } else {
+                currentPatterns = currentPatternsUnparsed.split(",", 2);
+            }
+
             currentPatternsUnparsed = currentPatterns[1].concat(",").concat(currentPatterns[1]);
 
             sharedPrefEditor.putString(SHAREDPREFERENCES_CURRENT_PATTERNS_ORDER,

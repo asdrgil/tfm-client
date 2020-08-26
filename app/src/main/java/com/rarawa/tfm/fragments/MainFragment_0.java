@@ -55,7 +55,7 @@ public class MainFragment_0 extends Fragment implements View.OnClickListener {
 
         setString1();
         setString2();
-        setString3();
+        //setString3();
 
         Button btnViewHistory = rootView.findViewById(R.id.btnViewHistory);
         btnViewHistory.setOnClickListener((View.OnClickListener) this);
@@ -107,7 +107,7 @@ public class MainFragment_0 extends Fragment implements View.OnClickListener {
 
             if (hours > 0) {
                 if (result.length() > 0) {
-                    result +="y ";
+                    result +=" y ";
                 }
 
                 result += String.format("%d hora", hours);
@@ -179,7 +179,7 @@ public class MainFragment_0 extends Fragment implements View.OnClickListener {
 
     }
 
-    public void setString3(){
+    /*public void setString3(){
         TextView textMain0_2 = rootView.findViewById(R.id.textMain0_2);
         TextView textMain0_3 = rootView.findViewById(R.id.textMain0_3);
         TextView textMain0_4 = rootView.findViewById(R.id.textMain0_4);
@@ -224,6 +224,6 @@ public class MainFragment_0 extends Fragment implements View.OnClickListener {
             textMain0_5.setText(res[0]);
         }
 
-    }
+    }*/
 
 }
