@@ -1,6 +1,8 @@
 package com.rarawa.tfm.fragments;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
@@ -101,6 +103,12 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
 
             //OK
             if(result > 0){
+
+                SharedPreferences sharedPref = getContext().getSharedPreferences(
+                        Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
+                SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
+                sharedPrefEditor.putInt(Constants.SHAREDPREFERENCES_REGISTERED, 1);
+                sharedPrefEditor.commit();
 
                 ((MainActivity) getActivity()).setFragment(Constants.FRAGMENT_INDEX_NOT_CALIBRATED,
                         "Paciente registrado correctamente.", Snackbar.LENGTH_LONG);

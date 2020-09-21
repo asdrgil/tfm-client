@@ -36,8 +36,7 @@
 
     <string name="calibrate_wakeup_snackbar2">Es necesario especificar primero la hora a la que te
         acostaste</string>
-    <string name="calibrate_wakeup_snackbar3">Se ha finalizado correctamente la calibración de la
-        actividad física</string>
+    <string name="calibrate_wakeup_snackbar3">Se ha finalizado correctamente la calibración del sueño</string>
 
     <string name="calibrate_sleep_alert">¿Quieres eliminar la hora a la que te acostaste?</string>
     <string name="calibrate_wakeup_alert">Confirma si quieres guardar la hora actual como la hora a la que te levantaste</string>

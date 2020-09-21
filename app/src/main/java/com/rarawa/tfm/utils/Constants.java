@@ -130,6 +130,8 @@ public class Constants {
     public static final String SHAREDPREFERENCES_FIRST_ZERO_LEVEL_PLATEAU = "firstZeroLevelPlateau";
     public static final String SHAREDPREFERENCES_CURRENT_PATTERNS_ORDER = "currentPatternsOrder";
 
+    public static final String SHAREDPREFERENCES_REGISTERED = "registered";
+
     public static final String SHAREDPREFERENCES_CALIBRATE_STATE_SLEEP = "calibrateStateSleep";
     public static final int STATUS_NOT_CALIBRATING_SLEEP = 0;
     public static final int STATUS_CALIBRATING_SLEEP = 1;
@@ -160,10 +162,10 @@ public class Constants {
     public static final int EXECUTION_MODE_SIMULATE_EPISODE = 1;
     public static final int EXECUTION_MODE_SIMULATE_DB = 2;
     public static final int EXECUTION_MODE_DO_NOTHING = 3;
-    public static final boolean AUTOMATIC_REGISTER = true;
+    public static final boolean AUTOMATIC_REGISTER = false;
     public static final boolean AUTOMATIC_CALIBRATE = true;
 
-    public static final int EXECUTION_MODE = EXECUTION_MODE_SIMULATE_EPISODE;
+    public static final int EXECUTION_MODE = EXECUTION_MODE_SIMULATE_DB;
 
     public static final int DIRECTION_LEFT = 0;
     public static final int DIRECTION_RIGHT = 1;

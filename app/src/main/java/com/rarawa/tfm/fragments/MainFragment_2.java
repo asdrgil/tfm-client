@@ -3,6 +3,7 @@ package com.rarawa.tfm.fragments;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.rarawa.tfm.MainActivity;
 import com.rarawa.tfm.R;
@@ -120,6 +122,13 @@ public class MainFragment_2 extends Fragment implements View.OnClickListener {
 
             case R.id.btnSaveComment:
                 saveComment();
+                Button btnSaveComment = rootView.findViewById(R.id.btnSaveComment);
+                patternCommentView.setText("");
+                btnSaveComment.setEnabled(false);
+
+                MainActivity.snackbar("Comentario guardado correctamente",
+                        Snackbar.LENGTH_SHORT);
+
                 break;
 
             case R.id.btnOkPattern:

@@ -35,7 +35,7 @@ public class CalibrateRingMeasurementsHandler extends SQLiteOpenHelper {
     }
 
     public static void deleteMinimumMeasurementsSensor(SQLiteDatabase db){
-        String query = String.format("DELETE FROM %s" +
+        String query = String.format("DELETE FROM %s " +
                                 "WHERE %s < 5",
                 CalibrateRingMeasurements.TABLE_NAME,
                 CalibrateRingMeasurements.COLUMN_ID);
@@ -46,7 +46,7 @@ public class CalibrateRingMeasurementsHandler extends SQLiteOpenHelper {
     }
 
     public static void deleteMaximumMeasurementsSensor(SQLiteDatabase db){
-        String query = String.format("DELETE FROM %s" +
+        String query = String.format("DELETE FROM %s " +
                         "WHERE %s > 4",
                 CalibrateRingMeasurements.TABLE_NAME,
                 CalibrateRingMeasurements.COLUMN_ID);

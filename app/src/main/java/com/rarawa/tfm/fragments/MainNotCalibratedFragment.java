@@ -1,7 +1,10 @@
 package com.rarawa.tfm.fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +16,9 @@ import com.rarawa.tfm.R;
 import com.rarawa.tfm.sqlite.SqliteHandler;
 import com.rarawa.tfm.utils.Constants;
 
+import static com.rarawa.tfm.utils.Constants.LOG_TAG;
+import static com.rarawa.tfm.utils.Constants.SHAREDPREFERENCES_REGISTERED;
+
 
 public class MainNotCalibratedFragment extends Fragment implements View.OnClickListener {
 
@@ -21,19 +27,21 @@ public class MainNotCalibratedFragment extends Fragment implements View.OnClickL
         final View rootView = inflater.inflate(R.layout.fragment_main_not_calibrated, container,
                 false);
 
-        //TODO: currently it appears as null reference (probably should be assigned from MainActivity)
-
         Button btnRegister = rootView.findViewById(R.id.btnRegister);
         Button btnCalibrate = rootView.findViewById(R.id.btnCalibrate);
         TextView textCounter = rootView.findViewById(R.id.calibrate_main);
 
+        SharedPreferences sharedPref = getContext().getSharedPreferences(
+                Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
+
+        int registered = sharedPref.getInt(SHAREDPREFERENCES_REGISTERED, 0);
+
         SqliteHandler db = new SqliteHandler(getContext());
-        boolean registered = db.userInfoExists();
         int calibrateSleep = db.calibrateSleepExists();
         int calibrateExercise = db.calibrateExerciseExists();
 
         //User not registered
-        if(!registered){
+        if(registered == 0){
             btnRegister.setEnabled(true);
             btnCalibrate.setEnabled(false);
             btnRegister.setOnClickListener(this);
@@ -42,7 +50,7 @@ public class MainNotCalibratedFragment extends Fragment implements View.OnClickL
             textCounter.setTextColor(getResources().getColor(R.color.red));
 
         //Registered but not calibrated
-        } else if(registered && (calibrateSleep + calibrateExercise < 6)) {
+        } else if(registered > 0 && (calibrateSleep + calibrateExercise < 6)) {
             btnRegister.setEnabled(false);
             btnCalibrate.setEnabled(true);
             btnCalibrate.setOnClickListener(this);
@@ -53,7 +61,7 @@ public class MainNotCalibratedFragment extends Fragment implements View.OnClickL
 
             textCounter.setText("1/2");
             textCounter.setTextColor(getResources().getColor(R.color.orange));
-        } else if(registered && (calibrateSleep + calibrateExercise == 6)){
+        } else if(registered > 0 && (calibrateSleep + calibrateExercise == 6)){
             ((MainActivity) getActivity()).setFragment(Constants.FRAGMENT_MAIN);
 
         }

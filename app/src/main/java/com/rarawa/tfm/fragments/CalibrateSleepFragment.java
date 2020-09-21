@@ -108,7 +108,11 @@ public class CalibrateSleepFragment extends Fragment implements View.OnClickList
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     db.deleteCalibrateSleep();
-                                    updateBtnTxt();
+                                    //updateBtnTxt();
+
+                                    btnSleep.setText(getResources().getText(R.string.calibrate_sleep_btn1));
+                                    btnWakeUp.setEnabled(false);
+                                    textInfo.setVisibility(View.GONE);
 
                                     SharedPreferences sharedPref = getContext().getSharedPreferences(
                                             Constants.SHAREDPREFERENCES_FILE, Context.MODE_PRIVATE);
@@ -170,6 +174,9 @@ public class CalibrateSleepFragment extends Fragment implements View.OnClickList
                                 //The timelapse from wakeup time is lower than
                                 // Constants.MINIMUM_SLEEP_CALIBRATE_TIME
                                 if(result == -2){
+                                    btnSleep.setText(getResources().getText(R.string.calibrate_sleep_btn1));
+                                    btnSleep.setEnabled(true);
+                                    btnWakeUp.setEnabled(false);
                                     MainActivity.snackbar(
                                             getResources().getText(
                                                     R.string.calibrate_wakeup_snackbar1).toString(),
@@ -177,6 +184,9 @@ public class CalibrateSleepFragment extends Fragment implements View.OnClickList
 
                                 //Sleep time is not defined
                                 } else if(result == -1){
+                                    btnSleep.setText(getResources().getText(R.string.calibrate_sleep_btn1));
+                                    btnSleep.setEnabled(true);
+                                    btnWakeUp.setEnabled(false);
                                     MainActivity.snackbar(
                                             getResources().getText(
                                                     R.string.calibrate_wakeup_snackbar2).toString(),

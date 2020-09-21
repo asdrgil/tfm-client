@@ -205,8 +205,8 @@ public class ApiRest {
         RequestQueue requestQueue = Volley.newRequestQueue(context);
 
         SqliteHandler db = new SqliteHandler(context);
-        //String communicationToken = db.getUserInfo().getCommunicationToken();
-        String communicationToken = "LJ95273L2Y"; //DEBUG
+        String communicationToken = db.getUserInfo().getCommunicationToken();
+        //String communicationToken = "LJ95273L2Y"; //DEBUG
         String url = API_BASE_URL.concat(UPDATE_DISPLAY_PATTERNS).concat(communicationToken);
         JSONObject episodes = db.getUnsyncedPatterns();
         JSONObject reasonAnger = db.getUnsyncedReasonAnger();
